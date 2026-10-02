@@ -1,0 +1,2895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Sultan Pyramids Boutique Hotel View - Operations & Reservations</title>
+  <meta name="description" content="Premium Hotel Operations & Reservation Management System for Sultan Pyramids Boutique Hotel View, Giza, Egypt." />
+  <meta property="og:title" content="Sultan Pyramids Boutique Hotel View - Operations & Reservations" />
+  <meta property="og:description" content="Internal hotel operations management system for Sultan Pyramids Boutique Hotel View, Giza, Egypt." />
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- React 18 & Recharts CDN for Dashboard Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/recharts@2.12.7/umd/Recharts.min.js"></script>
+  <style>
+    :root {
+      --obsidian: #151515;
+      --deep-charcoal: #202020;
+      --card-bg: #262626;
+      --warm-limestone: #E9E1D2;
+      --desert-sand: #C7B28D;
+      --muted-gold: #B99A61;
+      --warm-white: #FAF9F6;
+      --main-text: #252525;
+      --secondary-text: #77736B;
+      --border-color: #E2DBD0;
+      --success-green: #287A57;
+      --warning-amber: #B78128;
+      --error-red: #B84040;
+      --info-blue: #2B6CB0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--warm-white);
+      color: var(--main-text);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Brand Header */
+    header.brand-header {
+      background-color: var(--obsidian);
+      color: var(--warm-white);
+      border-bottom: 2px solid var(--muted-gold);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .pyramid-icon {
+      width: 28px;
+      height: 28px;
+      stroke: var(--muted-gold);
+      fill: none;
+      stroke-width: 2;
+    }
+    .brand-title-group h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--warm-limestone);
+      text-transform: uppercase;
+    }
+    .brand-title-group span {
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      color: var(--desert-sand);
+      text-transform: uppercase;
+      display: block;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-header {
+      background: transparent;
+      border: 1px solid var(--muted-gold);
+      color: var(--warm-limestone);
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 38px;
+    }
+    .btn-header:hover {
+      background: rgba(185, 154, 97, 0.15);
+    }
+    /* Navigation Bar */
+    nav.main-nav {
+      background-color: var(--deep-charcoal);
+      display: flex;
+      overflow-x: auto;
+      border-bottom: 1px solid #333;
+      padding: 0 16px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .nav-tab {
+      background: none;
+      border: none;
+      color: #A09C94;
+      padding: 12px 18px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-tab.active {
+      color: var(--warm-limestone);
+      border-bottom-color: var(--muted-gold);
+      font-weight: 600;
+    }
+    /* Banner */
+    .system-banner {
+      padding: 10px 20px;
+      font-size: 0.82rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #F4EFE6;
+      border-bottom: 1px solid var(--border-color);
+      color: #555047;
+    }
+    .system-banner.connected {
+      background: #EAF4EE;
+      color: #1E5C40;
+      border-bottom-color: #C3E2D0;
+    }
+    .system-banner.warning {
+      background: #FDF6E7;
+      color: #8C5F17;
+      border-bottom-color: #F0D9A8;
+    }
+    /* Main Layout */
+    main.content-area {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+    /* Titles & Action Bar */
+    .section-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--obsidian);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .date-navigator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      border: 1px solid var(--border-color);
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .btn-nav-arrow {
+      background: none;
+      border: 1px solid #CCC;
+      padding: 4px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    /* Buttons */
+    .btn-primary {
+      background-color: var(--obsidian);
+      color: var(--warm-white);
+      border: 1px solid var(--muted-gold);
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 42px;
+    }
+    .btn-primary:hover {
+      background-color: #262626;
+    }
+    .btn-secondary {
+      background-color: white;
+      color: var(--main-text);
+      border: 1px solid var(--border-color);
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border-radius: 4px;
+      cursor: pointer;
+      min-height: 42px;
+    }
+    .btn-secondary:hover {
+      background-color: #F8F6F2;
+    }
+    .btn-action {
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+      font-weight: 600;
+      min-height: 36px;
+    }
+    .btn-checkin { background: #E8F5E9; color: var(--success-green); border: 1px solid #A5D6A7; }
+    .btn-checkout { background: #ECEFF1; color: #455A64; border: 1px solid #CFD8DC; }
+    .btn-danger { background: #FFEBEE; color: var(--error-red); border: 1px solid #FFCDD2; }
+    /* Dashboard Cards Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .metric-card {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .metric-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--secondary-text);
+      margin-bottom: 6px;
+    }
+    .metric-value {
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: var(--obsidian);
+    }
+    .metric-sub {
+      font-size: 0.75rem;
+      color: var(--secondary-text);
+      margin-top: 4px;
+    }
+    /* Category Summary Box */
+    .summary-card {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+    .summary-card h3 {
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+      color: var(--obsidian);
+      border-bottom: 1px solid #F0ECE4;
+      padding-bottom: 8px;
+    }
+    /* Tables & Responsive Lists */
+    .table-container {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow-x: auto;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+    table.data-table th {
+      background-color: #F8F6F2;
+      color: var(--secondary-text);
+      font-weight: 600;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+    table.data-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #F0ECE4;
+      vertical-align: middle;
+    }
+    table.data-table tr:hover {
+      background-color: #FAF8F5;
+    }
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .badge-confirmed { background: #EBF8FF; color: var(--info-blue); border: 1px solid #BEE3F8; }
+    .badge-checkedin { background: #F0FFF4; color: var(--success-green); border: 1px solid #C6F6D5; }
+    .badge-checkedout { background: #EDF2F7; color: #4A5568; border: 1px solid #E2E8F0; }
+    .badge-cancelled { background: #FFF5F5; color: var(--error-red); border: 1px solid #FED7D7; }
+    .badge-noshow { background: #FFFAF0; color: var(--warning-amber); border: 1px solid #FEEBC8; }
+    .badge-unconfigured { background: #FFF0F0; color: #C53030; border: 1px dashed #FEB2B2; }
+    .badge-jacuzzi { background: #F7FAFC; color: var(--muted-gold); border: 1px solid var(--muted-gold); }
+    /* Room Rack Grid */
+    .rack-calendar-container {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow-x: auto;
+      position: relative;
+    }
+    .rack-grid {
+      display: grid;
+      min-width: 950px;
+      user-select: none;
+    }
+    .rack-header-row {
+      display: flex;
+      background: #F3EFE8;
+      border-bottom: 2px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .rack-room-col-header {
+      width: 220px;
+      min-width: 220px;
+      padding: 10px 12px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--obsidian);
+      background: #EFE9DF;
+      border-right: 2px solid var(--border-color);
+      position: sticky;
+      left: 0;
+      z-index: 12;
+    }
+    .rack-date-cells {
+      display: flex;
+      flex-grow: 1;
+    }
+    .rack-date-header {
+      flex: 1;
+      min-width: 55px;
+      padding: 8px 4px;
+      text-align: center;
+      border-right: 1px solid var(--border-color);
+      font-size: 0.75rem;
+    }
+    .rack-date-header.today {
+      background: #E4DAC9;
+      font-weight: 700;
+    }
+    .rack-category-row {
+      background: #F8F5EE;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #605B52;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+    .rack-room-row {
+      display: flex;
+      border-bottom: 1px solid #ECE7DE;
+      min-height: 48px;
+    }
+    .rack-room-info {
+      width: 220px;
+      min-width: 220px;
+      padding: 8px 12px;
+      background: #FDFBF8;
+      border-right: 2px solid var(--border-color);
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .rack-room-info:hover {
+      background: #F5EFE4;
+    }
+    .rack-room-number {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--obsidian);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .rack-room-meta {
+      font-size: 0.72rem;
+      color: var(--secondary-text);
+    }
+    .rack-days-strip {
+      display: flex;
+      flex-grow: 1;
+      position: relative;
+    }
+    .rack-day-cell {
+      flex: 1;
+      min-width: 55px;
+      border-right: 1px solid #EFEAE2;
+      height: 100%;
+      cursor: pointer;
+      position: relative;
+    }
+    .rack-day-cell:hover {
+      background-color: rgba(199, 178, 141, 0.2);
+    }
+    .rack-day-cell.today-col {
+      background-color: rgba(233, 225, 210, 0.35);
+    }
+    /* Reservation Bar */
+    .rack-res-bar {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: white;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      cursor: grab;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+    .rack-res-bar.Confirmed { background-color: var(--info-blue); }
+    .rack-res-bar.Checked-in { background-color: var(--success-green); }
+    .rack-res-bar.Checked-out { background-color: #5A6A78; }
+    .rack-res-bar.Cancelled { background-color: #A0AEC0; text-decoration: line-through; }
+    .rack-res-bar.No-show { background-color: var(--warning-amber); }
+    .rack-block-bar {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #333;
+      background: repeating-linear-gradient(45deg, #E2E8F0, #E2E8F0 10px, #CBD5E0 10px, #CBD5E0 20px);
+      border: 1px solid #A0AEC0;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+    }
+    /* Modal Layer */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+      overflow-y: auto;
+      padding: 20px;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal-box {
+      background: white;
+      border-radius: 6px;
+      max-width: 650px;
+      width: 100%;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+    .modal-header {
+      background: var(--obsidian);
+      color: var(--warm-limestone);
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--muted-gold);
+    }
+    .modal-header h3 { font-size: 1.05rem; }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--desert-sand);
+      font-size: 1.3rem;
+      cursor: pointer;
+    }
+    .modal-body {
+      padding: 20px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal-footer {
+      background: #F9F7F3;
+      padding: 12px 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    /* Form Styles */
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--main-text);
+      margin-bottom: 4px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 0.88rem;
+      min-height: 42px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    /* Filters Container */
+    .filters-bar {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 14px;
+      margin-bottom: 16px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      align-items: flex-end;
+    }
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+      header.brand-header { padding: 10px 14px; }
+      .brand-title-group h1 { font-size: 0.95rem; }
+      .brand-title-group span { font-size: 0.65rem; }
+      main.content-area { padding: 12px; }
+      .rack-room-col-header, .rack-room-info { width: 140px; min-width: 140px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Brand Header -->
+  <header class="brand-header">
+    <a href="#" class="brand-logo" onclick="switchTab('dashboard'); return false;">
+      <svg class="pyramid-icon" viewBox="0 0 24 24">
+        <polygon points="12,2 2,22 22,22"></polygon>
+        <line x1="12" y1="2" x2="12" y2="22"></line>
+      </svg>
+      <div class="brand-title-group">
+        <h1>Sultan Pyramids</h1>
+        <span>Boutique Hotel View • Giza</span>
+      </div>
+    </a>
+    <div class="header-actions">
+      <button class="btn-header" onclick="openNewReservationModal()">
+        <span>+</span> New Reservation
+      </button>
+      <button class="btn-header" onclick="openSettingsModal()">
+        ⚙️ <span id="authStatusText">Settings</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="main-nav">
+    <button class="nav-tab active" id="tab-btn-dashboard" onclick="switchTab('dashboard')">
+      📊 Dashboard
+    </button>
+    <button class="nav-tab" id="tab-btn-reservations" onclick="switchTab('reservations')">
+      📑 All Reservations
+    </button>
+    <button class="nav-tab" id="tab-btn-rack" onclick="switchTab('rack')">
+      📅 Room Rack (Calendar)
+    </button>
+    <button class="nav-tab" id="tab-btn-arrivals" onclick="switchTab('arrivals')">
+      🛎️ Daily Arrivals
+    </button>
+  </nav>
+
+  <!-- Status / Diagnostics Banner -->
+  <div id="systemBanner" class="system-banner">
+    <span id="bannerText">Checking Supabase connection...</span>
+    <button class="btn-header" style="color:var(--obsidian); border-color:#888;" onclick="openSettingsModal()">Configure Supabase</button>
+  </div>
+
+  <main class="content-area">
+
+    <!-- PAGE 1: HOTEL OPERATIONS DASHBOARD -->
+    <section id="page-dashboard" class="page-section active">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Hotel Operations Dashboard</h2>
+          <span style="font-size:0.8rem; color:var(--secondary-text);">Africa/Cairo Business Date: <strong id="dashCurrentDate"></strong></span>
+        </div>
+        <div class="date-navigator">
+          <button class="btn-nav-arrow" onclick="changeBusinessDate(-1)">‹</button>
+          <input type="date" id="businessDateInput" class="form-control" style="min-height:34px; padding:4px;" onchange="setBusinessDate(this.value)" />
+          <button class="btn-nav-arrow" onclick="changeBusinessDate(1)">›</button>
+          <button class="btn-secondary" style="padding:4px 8px; min-height:34px;" onclick="resetBusinessDateToday()">Today</button>
+        </div>
+      </div>
+
+      <!-- Key Operational Metrics -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Today's Arrivals</div>
+          <div class="metric-value" id="mTodayArrivals">0</div>
+          <div class="metric-sub" id="mArrivalsBreakdown">0 Expected • 0 Checked-in</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Today's Departures</div>
+          <div class="metric-value" id="mTodayDepartures">0</div>
+          <div class="metric-sub" id="mDeparturesBreakdown">0 Due • 0 Checked-out</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Currently Occupied</div>
+          <div class="metric-value" id="mOccupiedRooms">0 / 13</div>
+          <div class="metric-sub">Active Checked-in rooms</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Available Today</div>
+          <div class="metric-value" id="mAvailableRooms">13</div>
+          <div class="metric-sub">Configured operational rooms</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Occupancy Rate</div>
+          <div class="metric-value" id="mOccupancyRate">0%</div>
+          <div class="metric-sub">Occupied ÷ Operational rooms</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">In-House Guests</div>
+          <div class="metric-value" id="mInHouseGuests">0</div>
+          <div class="metric-sub" id="mGuestsBreakdown">0 Adults • 0 Children</div>
+        </div>
+      </div>
+
+      <!-- Financial Metrics Section -->
+      <div class="summary-card" style="margin-bottom:20px; background:#FCFAF7; border-color:#DFD8CC;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; border-bottom:1px solid #EDE7DC; padding-bottom:8px; flex-wrap:wrap; gap:8px;">
+          <div>
+            <h3 style="border-bottom:none; margin-bottom:2px; padding-bottom:0; display:flex; align-items:center; gap:8px;">
+              <span>💵</span> Financial Metrics & Revenue Operations
+            </h3>
+            <span style="font-size:0.75rem; color:var(--secondary-text);">Accurate revenue calculations derived directly from active reservation records (excluding cancelled bookings)</span>
+          </div>
+          <div style="font-size:0.75rem; color:var(--secondary-text); background:#FFF; border:1px solid var(--border-color); padding:4px 8px; border-radius:4px;">
+            Formula: ADR = Total Gross Revenue ÷ Total Room Nights
+          </div>
+        </div>
+
+        <div class="metrics-grid" style="margin-bottom:6px;">
+          <div class="metric-card" style="border-left:4px solid var(--success-green);">
+            <div class="metric-label">Total Gross Revenue</div>
+            <div class="metric-value" id="mGrossRevenue" style="color:var(--success-green); font-size:1.55rem;">USD 0.00</div>
+            <div class="metric-sub" id="mGrossRevenueSub">Collected: USD 0.00</div>
+          </div>
+          <div class="metric-card" style="border-left:4px solid var(--warning-amber);">
+            <div class="metric-label">Outstanding Balances</div>
+            <div class="metric-value" id="mOutstandingBalances" style="color:var(--warning-amber); font-size:1.55rem;">USD 0.00</div>
+            <div class="metric-sub" id="mOutstandingSub">0 bookings with balance due</div>
+          </div>
+          <div class="metric-card" style="border-left:4px solid var(--muted-gold);">
+            <div class="metric-label">Average Daily Rate (ADR)</div>
+            <div class="metric-value" id="mADR" style="color:var(--obsidian); font-size:1.55rem;">USD 0.00</div>
+            <div class="metric-sub" id="mADRSub">Calculated across booked nights</div>
+          </div>
+        </div>
+
+        <div id="multiCurrencyBreakdown" style="display:none; font-size:0.78rem; color:var(--secondary-text); margin-top:10px; padding-top:8px; border-top:1px dashed #E2DBD0;"></div>
+      </div>
+
+      <!-- Attention Items (Unconfigured, OOS, Maintenance) -->
+      <div id="attentionAlertBox" style="display:none; background:#FFF5F5; border:1px solid #FEB2B2; border-radius:6px; padding:14px; margin-bottom:20px;">
+        <h3 style="color:#C53030; font-size:0.9rem; margin-bottom:6px;">⚠️ Rooms Requiring Manager Attention</h3>
+        <div id="attentionItemsList" style="font-size:0.82rem; color:#742A2A;"></div>
+      </div>
+
+      <!-- 30-Day Hotel Occupancy Rates (Recharts) -->
+      <div class="summary-card" style="margin-bottom:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #F0ECE4; padding-bottom:8px; flex-wrap:wrap; gap:8px;">
+          <div>
+            <h3 style="border-bottom:none; margin-bottom:2px; padding-bottom:0;">Hotel Occupancy Rate (Last 30 Days)</h3>
+            <span style="font-size:0.75rem; color:var(--secondary-text);">Daily room occupancy percentage derived from active reservation records across 13 physical rooms</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span id="thirtyDayAvgBadge" style="font-size:0.8rem; font-weight:700; color:var(--obsidian); background:#F4EFE6; border:1px solid var(--border-color); padding:4px 10px; border-radius:4px;">
+              30-Day Avg: Calculating...
+            </span>
+          </div>
+        </div>
+        <div id="occupancyChartContainer" style="width:100%; height:260px; min-height:260px; position:relative;">
+          <div style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--secondary-text); font-size:0.85rem;">
+            Loading occupancy visualization...
+          </div>
+        </div>
+      </div>
+
+      <!-- Operational Breakdown & Quick Lists -->
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:20px;">
+        <div class="summary-card">
+          <h3>Room Inventory Breakdown (13 Physical Rooms)</h3>
+          <div id="categoryInventorySummary" style="font-size:0.83rem;"></div>
+        </div>
+        <div class="summary-card">
+          <h3>Arrivals Today (Africa/Cairo)</h3>
+          <div id="dashTodayArrivalsList" style="font-size:0.83rem;">Loading arrivals...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PAGE 2: ALL RESERVATIONS -->
+    <section id="page-reservations" class="page-section">
+      <div class="section-header">
+        <h2 class="section-title">All Reservations</h2>
+        <button class="btn-primary" onclick="openNewReservationModal()">+ New Reservation</button>
+      </div>
+
+      <!-- Filters Bar -->
+      <div class="filters-bar">
+        <div class="form-group" style="margin:0;">
+          <label>Search Guest / ID / Ref</label>
+          <input type="text" id="resSearchInput" class="form-control" placeholder="Search by name, ref, ID..." oninput="applyReservationFilters()" />
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label>Room Category</label>
+          <select id="resFilterCategory" class="form-control" onchange="applyReservationFilters()">
+            <option value="">All Categories</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label>Status</label>
+          <select id="resFilterStatus" class="form-control" onchange="applyReservationFilters()">
+            <option value="">All Statuses</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Checked-in">Checked-in</option>
+            <option value="Checked-out">Checked-out</option>
+            <option value="Cancelled">Cancelled</option>
+            <option value="No-show">No-show</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin:0;">
+          <label>Booking Source</label>
+          <select id="resFilterSource" class="form-control" onchange="applyReservationFilters()">
+            <option value="">All Sources</option>
+            <option value="Booking.com">Booking.com</option>
+            <option value="Agoda">Agoda</option>
+            <option value="Hotelbeds">Hotelbeds</option>
+            <option value="Trip.com">Trip.com</option>
+            <option value="Direct">Direct</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <button class="btn-secondary" onclick="clearReservationFilters()">Clear Filters</button>
+      </div>
+
+      <!-- Reservations Table -->
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID / Ref</th>
+              <th>Guest Name</th>
+              <th>Dates & Nights</th>
+              <th>Category & Room</th>
+              <th>Guests</th>
+              <th>Source</th>
+              <th>Status</th>
+              <th>Financials</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reservationsTableBody">
+            <tr><td colspan="9" style="text-align:center; padding:20px;">Loading reservations...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PAGE 3: ROOM RACK CALENDAR -->
+    <section id="page-rack" class="page-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Interactive Room Rack (14 Days)</h2>
+          <span style="font-size:0.8rem; color:var(--secondary-text);">Drag bar to reassign (desktop) or tap to manage. Click empty cell to book.</span>
+        </div>
+        <div class="date-navigator">
+          <button class="btn-nav-arrow" onclick="shiftRackDays(-7)">‹ 7d</button>
+          <button class="btn-nav-arrow" onclick="shiftRackDays(-1)">‹</button>
+          <input type="date" id="rackStartDateInput" class="form-control" style="min-height:34px; padding:4px;" onchange="setRackStartDate(this.value)" />
+          <button class="btn-nav-arrow" onclick="shiftRackDays(1)">›</button>
+          <button class="btn-nav-arrow" onclick="shiftRackDays(7)">7d ›</button>
+          <button class="btn-secondary" style="padding:4px 8px; min-height:34px;" onclick="resetRackToday()">Today</button>
+          <button class="btn-secondary" style="padding:4px 8px; min-height:34px;" onclick="openBlockModal()">+ Block Room</button>
+        </div>
+      </div>
+
+      <!-- Rack Grid -->
+      <div class="rack-calendar-container" id="rackContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- PAGE 4: DAILY ARRIVALS -->
+    <section id="page-arrivals" class="page-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Daily Front-Desk Arrivals</h2>
+          <span style="font-size:0.8rem; color:var(--secondary-text);">Current date: <strong id="arrivalsDateLabel"></strong></span>
+        </div>
+        <div class="date-navigator">
+          <button class="btn-nav-arrow" onclick="changeArrivalsDate(-1)">‹</button>
+          <input type="date" id="arrivalsDatePicker" class="form-control" style="min-height:34px; padding:4px;" onchange="setArrivalsDate(this.value)" />
+          <button class="btn-nav-arrow" onclick="changeArrivalsDate(1)">›</button>
+          <button class="btn-secondary" style="padding:4px 8px; min-height:34px;" onclick="resetArrivalsToday()">Today</button>
+        </div>
+      </div>
+
+      <div class="filters-bar" style="margin-bottom:14px;">
+        <div class="form-group" style="margin:0;">
+          <label>Filter Arrival State</label>
+          <select id="arrivalsFilterState" class="form-control" onchange="renderDailyArrivals()">
+            <option value="Expected">Expected Arrivals</option>
+            <option value="Checked-in">Checked-in Guests</option>
+            <option value="No-show">No-Show Records</option>
+            <option value="All">All Today (excluding Cancelled)</option>
+            <option value="Cancelled">Cancelled (Special audit)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Room #</th>
+              <th>Guest Name & Phone</th>
+              <th>Category & Bed</th>
+              <th>Nights</th>
+              <th>Guests</th>
+              <th>Source & Ref</th>
+              <th>Payment</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="arrivalsTableBody">
+            <tr><td colspan="9" style="text-align:center; padding:20px;">No arrivals found.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: NEW RESERVATION -->
+  <div class="modal-backdrop" id="newResModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>New Reservation - Sultan Pyramids</h3>
+        <button class="modal-close" onclick="closeModal('newResModal')">&times;</button>
+      </div>
+      <form id="newResForm" onsubmit="handleSaveNewReservation(event)">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Guest Full Name *</label>
+              <input type="text" id="nGuestName" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label>Phone Number *</label>
+              <input type="tel" id="nGuestPhone" class="form-control" required placeholder="+20..." />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Guest Email</label>
+              <input type="email" id="nGuestEmail" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label>Booking Source *</label>
+              <select id="nBookingSource" class="form-control" required>
+                <option value="Direct">Direct</option>
+                <option value="Booking.com">Booking.com</option>
+                <option value="Agoda">Agoda</option>
+                <option value="Hotelbeds">Hotelbeds</option>
+                <option value="Trip.com">Trip.com</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Check-in Date *</label>
+              <input type="date" id="nCheckIn" class="form-control" required onchange="onReservationCriteriaChange()" />
+            </div>
+            <div class="form-group">
+              <label>Check-out Date *</label>
+              <input type="date" id="nCheckOut" class="form-control" required onchange="onReservationCriteriaChange()" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Adults *</label>
+              <input type="number" id="nAdults" class="form-control" min="1" value="1" required onchange="onReservationCriteriaChange()" />
+            </div>
+            <div class="form-group">
+              <label>Children</label>
+              <input type="number" id="nChildren" class="form-control" min="0" value="0" onchange="onReservationCriteriaChange()" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Standardized Room Category *</label>
+            <select id="nRoomCategory" class="form-control" required onchange="onReservationCriteriaChange()">
+              <option value="">Select Category...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Assigned Physical Room * (Auto-suggested based on availability)</label>
+            <select id="nPhysicalRoom" class="form-control" required>
+              <option value="">Select Dates & Category First</option>
+            </select>
+            <small id="nRoomHint" style="font-size:0.75rem; color:var(--secondary-text); margin-top:3px; display:block;"></small>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Total Price</label>
+              <input type="number" step="0.01" id="nTotalPrice" class="form-control" value="0" />
+            </div>
+            <div class="form-group">
+              <label>Currency</label>
+              <select id="nCurrency" class="form-control">
+                <option value="USD">USD ($)</option>
+                <option value="EGP">EGP (E£)</option>
+                <option value="EUR">EUR (€)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Payment Status</label>
+              <select id="nPaymentStatus" class="form-control">
+                <option value="Unpaid">Unpaid</option>
+                <option value="Partially Paid">Partially Paid</option>
+                <option value="Paid">Paid</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Amount Paid</label>
+              <input type="number" step="0.01" id="nAmountPaid" class="form-control" value="0" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>External Booking Reference</label>
+            <input type="text" id="nExternalRef" class="form-control" placeholder="e.g. BDC-987654321" />
+          </div>
+          <div class="form-group">
+            <label>Special Notes & Requests</label>
+            <textarea id="nNotes" class="form-control" rows="2" placeholder="Late check-in, pyramid view preference, etc."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('newResModal')">Cancel</button>
+          <button type="submit" class="btn-primary" id="btnSaveNewRes">Confirm & Save Reservation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: RESERVATION DETAILS & ACTIONS -->
+  <div class="modal-backdrop" id="resDetailsModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Reservation Details</h3>
+        <button class="modal-close" onclick="closeModal('resDetailsModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="resDetailsContent">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="modal-footer" id="resDetailsFooter">
+        <button type="button" class="btn-secondary" onclick="closeModal('resDetailsModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ROOM CONFIGURATION -->
+  <div class="modal-backdrop" id="roomConfigModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="rcTitle">Room Configuration</h3>
+        <button class="modal-close" onclick="closeModal('roomConfigModal')">&times;</button>
+      </div>
+      <form id="roomConfigForm" onsubmit="handleSaveRoomConfig(event)">
+        <input type="hidden" id="rcRoomId" />
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Room Number</label>
+            <input type="text" id="rcRoomNumber" class="form-control" readonly style="background:#F0ECE4; font-weight:700;" />
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <input type="text" id="rcCategory" class="form-control" readonly style="background:#F0ECE4;" />
+          </div>
+          <div class="form-group">
+            <label>Original OTA Room Name</label>
+            <input type="text" id="rcOtaName" class="form-control" readonly style="background:#F0ECE4;" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Bed Configuration</label>
+              <select id="rcBedConfig" class="form-control">
+                <option value="Double">Double</option>
+                <option value="Twin">Twin</option>
+                <option value="Configurable">Configurable</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Maximum Occupancy (Guests) *</label>
+              <input type="number" id="rcMaxOccupancy" class="form-control" min="1" max="10" placeholder="Required for booking" />
+              <small style="color:var(--error-red); font-size:0.75rem;" id="rcOccupancyWarn"></small>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Operational Status</label>
+            <select id="rcOperationalStatus" class="form-control">
+              <option value="Operational">Operational</option>
+              <option value="Out of Service">Out of Service</option>
+              <option value="Maintenance">Maintenance</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Internal Notes</label>
+            <textarea id="rcNotes" class="form-control" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('roomConfigModal')">Cancel</button>
+          <button type="submit" class="btn-primary">Save Room Configuration</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: OPERATIONAL BLOCK (MAINTENANCE) -->
+  <div class="modal-backdrop" id="blockModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Create Operational / Maintenance Block</h3>
+        <button class="modal-close" onclick="closeModal('blockModal')">&times;</button>
+      </div>
+      <form id="blockForm" onsubmit="handleSaveBlock(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Physical Room *</label>
+            <select id="bRoomId" class="form-control" required></select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Start Date *</label>
+              <input type="date" id="bStartDate" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label>End Date *</label>
+              <input type="date" id="bEndDate" class="form-control" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Reason *</label>
+            <input type="text" id="bReason" class="form-control" required placeholder="e.g. AC repair, deep painting, plumbing" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" onclick="closeModal('blockModal')">Cancel</button>
+          <button type="submit" class="btn-primary">Apply Block</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: SETTINGS & SUPABASE CONNECTION -->
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>System Settings & Database Connection</h3>
+        <button class="modal-close" onclick="closeModal('settingsModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h4 style="font-size:0.9rem; margin-bottom:8px; color:var(--obsidian);">Supabase PostgreSQL Configuration</h4>
+        <div class="form-group">
+          <label>Supabase Project URL</label>
+          <input type="text" id="cfgSupabaseUrl" class="form-control" value="https://qcgqpafmhelgibrjcqon.supabase.co" />
+        </div>
+        <div class="form-group">
+          <label>Supabase Public / Anon Key</label>
+          <input type="password" id="cfgSupabaseAnonKey" class="form-control" placeholder="eyJhbGciOiJIUzI1NiIsIn..." />
+          <small style="color:var(--secondary-text); font-size:0.75rem;">From Supabase Dashboard > Project Settings > API</small>
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:20px;">
+          <button type="button" class="btn-primary" onclick="testAndSaveSupabaseConfig()">Test Connection & Save</button>
+        </div>
+
+        <hr style="border:none; border-top:1px solid var(--border-color); margin:16px 0;" />
+
+        <h4 style="font-size:0.9rem; margin-bottom:8px; color:var(--obsidian);">Staff Authentication</h4>
+        <div id="authPanel">
+          <div class="form-group">
+            <label>Staff Email</label>
+            <input type="email" id="loginEmail" class="form-control" placeholder="manager@sultanpyramidshotel.com" />
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="loginPassword" class="form-control" />
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="btn-primary" onclick="handleStaffSignIn()">Sign In</button>
+            <button type="button" class="btn-secondary" onclick="handleStaffSignOut()">Sign Out</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="closeModal('settingsModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLICATION CORE SCRIPT -->
+  <script>
+    // =========================================================================
+    // SULTAN PYRAMIDS BOUTIQUE HOTEL VIEW - CORE LOGIC
+    // Exactly 13 Physical Rooms | 7 Standardized Categories
+    // Timezone: Africa/Cairo
+    // =========================================================================
+
+    const DEFAULT_SUPABASE_URL = "https://qcgqpafmhelgibrjcqon.supabase.co";
+    let supabaseClient = null;
+    let currentUser = null;
+
+    // Standard Room Categories
+    const CATEGORIES = [
+      { id: "cat-1", code: "side_pyramids_view", name: "Side Pyramids View" },
+      { id: "cat-2", code: "standard_economy", name: "Standard Economy, No View" },
+      { id: "cat-3", code: "triple_view", name: "Triple View" },
+      { id: "cat-4", code: "direct_pyramids_view", name: "Direct Pyramids View" },
+      { id: "cat-5", code: "triple_no_view", name: "Triple No View" },
+      { id: "cat-6", code: "double_city_view", name: "Double City View" },
+      { id: "cat-7", code: "jacuzzi_suite", name: "Jacuzzi Suite with Panoramic Pyramids View" }
+    ];
+
+    // Exactly 13 Physical Rooms specification
+    // Unconfirmed occupancies are initialized as null -> Requires Configuration
+    let PHYSICAL_ROOMS = [
+      { id: "r401", room_number: "401", category_code: "side_pyramids_view", category_name: "Side Pyramids View", ota_name: "Deluxe Double Room Side Pyramids View", bed_config: "Double", max_occupancy: null, status: "Operational", features: [] },
+      { id: "r402", room_number: "402", category_code: "side_pyramids_view", category_name: "Side Pyramids View", ota_name: "Deluxe Double Room Side Pyramids View", bed_config: "Double", max_occupancy: null, status: "Operational", features: [] },
+      { id: "r403", room_number: "403", category_code: "side_pyramids_view", category_name: "Side Pyramids View", ota_name: "Twin Room Side Pyramids View", bed_config: "Twin", max_occupancy: null, status: "Operational", features: [] },
+      { id: "r404", room_number: "404", category_code: "standard_economy", category_name: "Standard Economy, No View", ota_name: "Standard Twin Room", bed_config: "Twin", max_occupancy: null, status: "Operational", features: [] },
+      { id: "r408", room_number: "408", category_code: "standard_economy", category_name: "Standard Economy, No View", ota_name: "Standard Double Room", bed_config: "Double", max_occupancy: null, status: "Operational", features: [] },
+      { id: "r405", room_number: "405", category_code: "triple_view", category_name: "Triple View", ota_name: "Triple Room Pyramids View", bed_config: "Configurable", max_occupancy: 3, status: "Operational", features: [] },
+      { id: "r406", room_number: "406", category_code: "direct_pyramids_view", category_name: "Direct Pyramids View", ota_name: "Deluxe Double With Pyramids View", bed_config: "Double", max_occupancy: null, status: "Operational", features: [] },
+      { id: "r407", room_number: "407", category_code: "direct_pyramids_view", category_name: "Direct Pyramids View", ota_name: "Deluxe Double With Pyramids View", bed_config: "Double", max_occupancy: null, status: "Operational", features: [] },
+      { id: "r409", room_number: "409", category_code: "direct_pyramids_view", category_name: "Direct Pyramids View", ota_name: "Deluxe Double With Pyramids View", bed_config: "Double", max_occupancy: null, status: "Operational", features: [] },
+      { id: "r410", room_number: "410", category_code: "triple_no_view", category_name: "Triple No View", ota_name: "Standard Triple Room", bed_config: "Configurable", max_occupancy: 3, status: "Operational", features: [] },
+      { id: "r411", room_number: "411", category_code: "double_city_view", category_name: "Double City View", ota_name: "Deluxe Double Room With City View", bed_config: "Double", max_occupancy: null, status: "Operational", features: [] },
+      { id: "r501", room_number: "501", category_code: "jacuzzi_suite", category_name: "Jacuzzi Suite with Panoramic Pyramids View", ota_name: "Suite with Pyramids View", bed_config: "Configurable", max_occupancy: 5, status: "Operational", features: ["Jacuzzi", "Panoramic View"] },
+      { id: "r502", room_number: "502", category_code: "jacuzzi_suite", category_name: "Jacuzzi Suite with Panoramic Pyramids View", ota_name: "Suite with Pyramids View", bed_config: "Configurable", max_occupancy: 5, status: "Operational", features: ["Jacuzzi", "Panoramic View"] }
+    ];
+
+    let RESERVATIONS = [];
+    let OPERATIONAL_BLOCKS = [];
+
+    // State & Business Date in Africa/Cairo
+    function getCairoTodayString() {
+      try {
+        const d = new Date();
+        const cairoTime = new Intl.DateTimeFormat("en-CA", {
+          timeZone: "Africa/Cairo",
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit"
+        }).format(d);
+        return cairoTime; // YYYY-MM-DD
+      } catch (e) {
+        return new Date().toISOString().split("T")[0];
+      }
+    }
+
+    let currentBusinessDate = getCairoTodayString();
+    let rackStartDate = getCairoTodayString();
+    let arrivalsSelectedDate = getCairoTodayString();
+    let activeTab = "dashboard";
+
+    // Initialize application
+    window.addEventListener("DOMContentLoaded", async () => {
+      initCategoryDropdowns();
+      document.getElementById("businessDateInput").value = currentBusinessDate;
+      document.getElementById("dashCurrentDate").textContent = currentBusinessDate;
+      document.getElementById("rackStartDateInput").value = rackStartDate;
+      document.getElementById("arrivalsDatePicker").value = arrivalsSelectedDate;
+      document.getElementById("arrivalsDateLabel").textContent = arrivalsSelectedDate;
+
+      // Load Supabase or local persistent store
+      loadSavedRoomConfigurations();
+      loadSavedReservations();
+      loadSavedBlocks();
+
+      initSupabase();
+      renderAllViews();
+    });
+
+    // -------------------------------------------------------------------------
+    // SUPABASE INTEGRATION & STORAGE
+    // -------------------------------------------------------------------------
+    function initSupabase() {
+      const storedUrl = localStorage.getItem("sp_supabase_url") || DEFAULT_SUPABASE_URL;
+      const storedKey = localStorage.getItem("sp_supabase_key") || "";
+
+      document.getElementById("cfgSupabaseUrl").value = storedUrl;
+      document.getElementById("cfgSupabaseAnonKey").value = storedKey;
+
+      const banner = document.getElementById("systemBanner");
+      const bannerText = document.getElementById("bannerText");
+
+      if (window.supabase && storedUrl && storedKey) {
+        try {
+          supabaseClient = window.supabase.createClient(storedUrl, storedKey);
+          banner.className = "system-banner connected";
+          bannerText.innerHTML = "<strong>Connected to Supabase PostgreSQL</strong> (" + storedUrl + ")";
+          document.getElementById("authStatusText").textContent = "Connected";
+          syncFromSupabase();
+        } catch (e) {
+          banner.className = "system-banner warning";
+          bannerText.textContent = "Supabase initialization error. Using local persistent storage.";
+        }
+      } else {
+        banner.className = "system-banner warning";
+        bannerText.innerHTML = "<strong>Unconnected / Local Storage Mode</strong> — Click 'Configure Supabase' to connect your live database.";
+        document.getElementById("authStatusText").textContent = "Local Mode";
+      }
+    }
+
+    async function syncFromSupabase() {
+      if (!supabaseClient) return;
+      try {
+        const { data: resData, error: resErr } = await supabaseClient.from("reservations").select("*");
+        if (!resErr && resData) {
+          RESERVATIONS = resData;
+          saveReservationsLocally();
+        }
+        const { data: roomsData, error: roomsErr } = await supabaseClient.from("physical_rooms").select("*");
+        if (!roomsErr && roomsData && roomsData.length > 0) {
+          roomsData.forEach(r => {
+            const match = PHYSICAL_ROOMS.find(pr => pr.room_number === r.room_number);
+            if (match) {
+              match.id = r.id;
+              match.max_occupancy = r.max_occupancy;
+              match.status = r.operational_status;
+              match.bed_config = r.bed_configuration;
+              match.notes = r.notes;
+            }
+          });
+          saveRoomConfigurationsLocally();
+        }
+        renderAllViews();
+      } catch (err) {
+        console.warn("Supabase fetch failed, operating on cached store.", err);
+      }
+    }
+
+    async function testAndSaveSupabaseConfig() {
+      const url = document.getElementById("cfgSupabaseUrl").value.trim();
+      const key = document.getElementById("cfgSupabaseAnonKey").value.trim();
+      if (!url || !key) {
+        alert("Please enter both Supabase URL and Anon Public Key.");
+        return;
+      }
+      localStorage.setItem("sp_supabase_url", url);
+      localStorage.setItem("sp_supabase_key", key);
+      initSupabase();
+      closeModal("settingsModal");
+      alert("Supabase configuration saved.");
+    }
+
+    async function handleStaffSignIn() {
+      if (!supabaseClient) {
+        alert("Please configure and connect Supabase first.");
+        return;
+      }
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value;
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        currentUser = data.user;
+        alert("Authenticated as " + email);
+        document.getElementById("authStatusText").textContent = email.split("@")[0];
+        closeModal("settingsModal");
+        syncFromSupabase();
+      } catch (e) {
+        alert("Sign in failed: " + e.message);
+      }
+    }
+
+    async function handleStaffSignOut() {
+      if (supabaseClient) {
+        await supabaseClient.auth.signOut();
+      }
+      currentUser = null;
+      document.getElementById("authStatusText").textContent = "Signed Out";
+      alert("Signed out successfully.");
+    }
+
+    // Local Storage Helpers
+    function loadSavedRoomConfigurations() {
+      const data = localStorage.getItem("sp_rooms_config");
+      if (data) {
+        try {
+          const parsed = JSON.parse(data);
+          parsed.forEach(p => {
+            const found = PHYSICAL_ROOMS.find(r => r.room_number === p.room_number);
+            if (found) {
+              found.max_occupancy = p.max_occupancy;
+              found.status = p.status;
+              found.bed_config = p.bed_config;
+              found.notes = p.notes;
+            }
+          });
+        } catch (e) {}
+      }
+    }
+
+    function saveRoomConfigurationsLocally() {
+      localStorage.setItem("sp_rooms_config", JSON.stringify(PHYSICAL_ROOMS));
+    }
+
+    function loadSavedReservations() {
+      const data = localStorage.getItem("sp_reservations");
+      if (data) {
+        try { RESERVATIONS = JSON.parse(data); } catch (e) { RESERVATIONS = []; }
+      }
+    }
+
+    function saveReservationsLocally() {
+      localStorage.setItem("sp_reservations", JSON.stringify(RESERVATIONS));
+    }
+
+    function loadSavedBlocks() {
+      const data = localStorage.getItem("sp_blocks");
+      if (data) {
+        try { OPERATIONAL_BLOCKS = JSON.parse(data); } catch (e) { OPERATIONAL_BLOCKS = []; }
+      }
+    }
+
+    function saveBlocksLocally() {
+      localStorage.setItem("sp_blocks", JSON.stringify(OPERATIONAL_BLOCKS));
+    }
+
+    // -------------------------------------------------------------------------
+    // NAVIGATION & TAB SWITCHING
+    // -------------------------------------------------------------------------
+    function switchTab(tabId) {
+      activeTab = tabId;
+      document.querySelectorAll(".page-section").forEach(s => s.classList.remove("active"));
+      document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+
+      const section = document.getElementById("page-" + tabId);
+      const tabBtn = document.getElementById("tab-btn-" + tabId);
+      if (section) section.classList.add("active");
+      if (tabBtn) tabBtn.classList.add("active");
+
+      renderAllViews();
+    }
+
+    function renderAllViews() {
+      renderDashboard();
+      renderReservationsTable();
+      renderRoomRack();
+      renderDailyArrivals();
+    }
+
+    // -------------------------------------------------------------------------
+    // DATE MATH & LOGIC (Check-in inclusive, Check-out exclusive)
+    // -------------------------------------------------------------------------
+    function doDatesOverlap(start1, end1, start2, end2) {
+      return (start1 < end2) && (end1 > start2);
+    }
+
+    function calculateNights(checkIn, checkOut) {
+      const d1 = new Date(checkIn + "T00:00:00");
+      const d2 = new Date(checkOut + "T00:00:00");
+      const diff = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+      return diff > 0 ? diff : 0;
+    }
+
+    function addDays(dateStr, days) {
+      const d = new Date(dateStr + "T00:00:00");
+      d.setDate(d.getDate() + days);
+      return d.toISOString().split("T")[0];
+    }
+
+    // -------------------------------------------------------------------------
+    // ROOM MATCHING & ELIGIBILITY ENGINE (Section 13)
+    // -------------------------------------------------------------------------
+    function getEligibleRooms(categoryCode, checkIn, checkOut, totalGuests, preferredBed = "") {
+      if (!categoryCode || !checkIn || !checkOut || checkOut <= checkIn) {
+        return [];
+      }
+      return PHYSICAL_ROOMS.filter(room => {
+        // 1. Exact Category Match
+        if (room.category_code !== categoryCode) return false;
+        // 2. Operational Status Check
+        if (room.status !== "Operational") return false;
+        // 3. Occupancy Configuration Check (Must not be unconfigured)
+        if (room.max_occupancy === null || room.max_occupancy === undefined) return false;
+        // 4. Capacity Check
+        if (totalGuests > room.max_occupancy) return false;
+        // 5. Preferred Bed Configuration check (if specified)
+        if (preferredBed && room.bed_config !== "Configurable" && room.bed_config !== preferredBed) return false;
+        // 6. Active Reservation Overlap Check
+        const hasConflict = RESERVATIONS.some(res => {
+          if (res.physical_room_number !== room.room_number) return false;
+          if (res.reservation_status === "Cancelled") return false;
+          return doDatesOverlap(res.check_in_date, res.check_out_date, checkIn, checkOut);
+        });
+        if (hasConflict) return false;
+        // 7. Operational Block Overlap Check
+        const hasBlock = OPERATIONAL_BLOCKS.some(b => {
+          if (b.room_number !== room.room_number || b.status !== "Active") return false;
+          return doDatesOverlap(b.start_date, b.end_date, checkIn, checkOut);
+        });
+        if (hasBlock) return false;
+
+        return true;
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // PAGE 1: DASHBOARD CALCULATIONS
+    // -------------------------------------------------------------------------
+    function renderDashboard() {
+      document.getElementById("dashCurrentDate").textContent = currentBusinessDate;
+      document.getElementById("businessDateInput").value = currentBusinessDate;
+
+      // 1. Today's Arrivals (Check-in == currentBusinessDate, exclude Cancelled & No-show)
+      const expectedArrivals = RESERVATIONS.filter(r => r.check_in_date === currentBusinessDate && r.reservation_status === "Confirmed");
+      const checkedInToday = RESERVATIONS.filter(r => r.check_in_date === currentBusinessDate && r.reservation_status === "Checked-in");
+      const totalArrivalsCount = expectedArrivals.length + checkedInToday.length;
+
+      document.getElementById("mTodayArrivals").textContent = totalArrivalsCount;
+      document.getElementById("mArrivalsBreakdown").textContent = `${expectedArrivals.length} Expected • ${checkedInToday.length} Checked-in`;
+
+      // 2. Today's Departures (Check-out == currentBusinessDate, exclude Cancelled)
+      const dueDepartures = RESERVATIONS.filter(r => r.check_out_date === currentBusinessDate && r.reservation_status === "Checked-in");
+      const completedDepartures = RESERVATIONS.filter(r => r.check_out_date === currentBusinessDate && r.reservation_status === "Checked-out");
+      const totalDeparturesCount = dueDepartures.length + completedDepartures.length;
+
+      document.getElementById("mTodayDepartures").textContent = totalDeparturesCount;
+      document.getElementById("mDeparturesBreakdown").textContent = `${dueDepartures.length} In-house Due • ${completedDepartures.length} Checked-out`;
+
+      // 3. Currently Occupied (Distinct physical rooms with Checked-in status)
+      const occupiedRooms = new Set(
+        RESERVATIONS.filter(r => r.reservation_status === "Checked-in").map(r => r.physical_room_number)
+      );
+      const operationalCount = PHYSICAL_ROOMS.filter(r => r.status === "Operational").length;
+      document.getElementById("mOccupiedRooms").textContent = `${occupiedRooms.size} / ${operationalCount}`;
+
+      // 4. Available Rooms Today (Operational & Not occupied or blocked)
+      const availableCount = PHYSICAL_ROOMS.filter(r => {
+        if (r.status !== "Operational" || r.max_occupancy === null) return false;
+        const isOccupied = RESERVATIONS.some(res =>
+          res.physical_room_number === r.room_number &&
+          res.reservation_status === "Checked-in"
+        );
+        const hasBookingToday = RESERVATIONS.some(res =>
+          res.physical_room_number === r.room_number &&
+          res.reservation_status === "Confirmed" &&
+          res.check_in_date <= currentBusinessDate &&
+          res.check_out_date > currentBusinessDate
+        );
+        const isBlocked = OPERATIONAL_BLOCKS.some(b =>
+          b.room_number === r.room_number &&
+          b.status === "Active" &&
+          b.start_date <= currentBusinessDate &&
+          b.end_date > currentBusinessDate
+        );
+        return !isOccupied && !hasBookingToday && !isBlocked;
+      }).length;
+      document.getElementById("mAvailableRooms").textContent = availableCount;
+
+      // 5. Occupancy Percentage
+      const occPercent = operationalCount > 0 ? Math.round((occupiedRooms.size / operationalCount) * 100) : 0;
+      document.getElementById("mOccupancyRate").textContent = operationalCount > 0 ? `${occPercent}%` : "N/A";
+
+      // 6. In-House Guests
+      let inHouseAdults = 0;
+      let inHouseKids = 0;
+      RESERVATIONS.filter(r => r.reservation_status === "Checked-in").forEach(r => {
+        inHouseAdults += (Number(r.adults) || 0);
+        inHouseKids += (Number(r.children) || 0);
+      });
+      document.getElementById("mInHouseGuests").textContent = inHouseAdults + inHouseKids;
+      document.getElementById("mGuestsBreakdown").textContent = `${inHouseAdults} Adults • ${inHouseKids} Children`;
+
+      // 7. Attention Items (Unconfigured, OOS, Maintenance)
+      const attentionBox = document.getElementById("attentionAlertBox");
+      const attentionList = document.getElementById("attentionItemsList");
+      const unconfigured = PHYSICAL_ROOMS.filter(r => r.max_occupancy === null || r.max_occupancy === undefined);
+      const outOfService = PHYSICAL_ROOMS.filter(r => r.status === "Out of Service");
+      const maintenance = PHYSICAL_ROOMS.filter(r => r.status === "Maintenance");
+
+      let attentionHtml = "";
+      if (unconfigured.length > 0) {
+        attentionHtml += `<div><strong>Unconfigured Capacity (${unconfigured.length}):</strong> Rooms ${unconfigured.map(r => r.room_number).join(", ")} require maximum occupancy set before booking. <button class="btn-action" style="background:#FFF; margin-left:6px;" onclick="openRoomConfigModal('${unconfigured[0].room_number}')">Configure Now</button></div>`;
+      }
+      if (outOfService.length > 0) {
+        attentionHtml += `<div><strong>Out of Service (${outOfService.length}):</strong> Rooms ${outOfService.map(r => r.room_number).join(", ")}</div>`;
+      }
+      if (maintenance.length > 0) {
+        attentionHtml += `<div><strong>Maintenance (${maintenance.length}):</strong> Rooms ${maintenance.map(r => r.room_number).join(", ")}</div>`;
+      }
+      if (attentionHtml) {
+        attentionBox.style.display = "block";
+        attentionList.innerHTML = attentionHtml;
+      } else {
+        attentionBox.style.display = "none";
+      }
+
+      // 8. Room Category Inventory Summary
+      let catHtml = "<table style='width:100%; border-collapse:collapse;'>";
+      catHtml += "<tr style='border-bottom:1px solid #EEE;'><th style='padding:6px 0; text-align:left;'>Category</th><th style='text-align:center;'>Total</th><th style='text-align:center;'>Rooms</th></tr>";
+      CATEGORIES.forEach(c => {
+        const rooms = PHYSICAL_ROOMS.filter(r => r.category_code === c.code);
+        catHtml += `<tr style='border-bottom:1px solid #F5F5F5;'>
+          <td style='padding:6px 0;'><strong>${c.name}</strong></td>
+          <td style='text-align:center;'>${rooms.length}</td>
+          <td style='text-align:center; color:var(--secondary-text);'>${rooms.map(r => r.room_number).join(", ")}</td>
+        </tr>`;
+      });
+      catHtml += "</table>";
+      document.getElementById("categoryInventorySummary").innerHTML = catHtml;
+
+      // 9. Dashboard Today's Arrivals list
+      const arrivalsContainer = document.getElementById("dashTodayArrivalsList");
+      const allTodayArrivals = RESERVATIONS.filter(r => r.check_in_date === currentBusinessDate && r.reservation_status !== "Cancelled");
+      if (allTodayArrivals.length === 0) {
+        arrivalsContainer.innerHTML = "<p style='color:var(--secondary-text); padding:8px 0;'>No arrivals expected for this date.</p>";
+      } else {
+        let arrHtml = "<div style='display:flex; flex-direction:column; gap:8px;'>";
+        allTodayArrivals.forEach(r => {
+          arrHtml += `<div style='display:flex; justify-content:space-between; align-items:center; background:#FAF8F5; padding:8px 10px; border-radius:4px; border:1px solid var(--border-color);'>
+            <div>
+              <strong>${escapeHtml(r.guest_full_name)}</strong> (Room ${r.physical_room_number})
+              <div style='font-size:0.75rem; color:var(--secondary-text);'>${r.adults}A + ${r.children}C • ${r.booking_source}</div>
+            </div>
+            <div>
+              <span class='badge badge-${r.reservation_status.toLowerCase()}'>${r.reservation_status}</span>
+              ${r.reservation_status === 'Confirmed' ? `<button class='btn-action btn-checkin' style='margin-left:6px;' onclick='handleCheckInReservation("${r.id}")'>Check In</button>` : ''}
+            </div>
+          </div>`;
+        });
+        arrHtml += "</div>";
+        arrivalsContainer.innerHTML = arrHtml;
+      }
+
+      // 10. Financial Metrics (Total Gross Revenue, Outstanding Balances, ADR)
+      renderFinancialMetrics();
+
+      // 11. 30-Day Occupancy Trend Chart (Recharts)
+      renderOccupancyChart();
+    }
+
+    // -------------------------------------------------------------------------
+    // FINANCIAL METRICS & REVENUE OPERATIONS
+    // -------------------------------------------------------------------------
+    function renderFinancialMetrics() {
+      const activeReservations = RESERVATIONS.filter(r => r.reservation_status !== "Cancelled");
+
+      // Aggregate financials by currency
+      const currencyTotals = {};
+
+      activeReservations.forEach(r => {
+        const curr = (r.currency || "USD").toUpperCase();
+        if (!currencyTotals[curr]) {
+          currencyTotals[curr] = {
+            grossRevenue: 0,
+            amountPaid: 0,
+            outstanding: 0,
+            nights: 0,
+            count: 0
+          };
+        }
+        const price = Number(r.total_reservation_price) || 0;
+        const paid = Number(r.amount_paid) || 0;
+        const bal = Math.max(0, price - paid);
+        const nights = calculateNights(r.check_in_date, r.check_out_date) || 1;
+
+        currencyTotals[curr].grossRevenue += price;
+        currencyTotals[curr].amountPaid += paid;
+        currencyTotals[curr].outstanding += bal;
+        currencyTotals[curr].nights += nights;
+        currencyTotals[curr].count += 1;
+      });
+
+      const currencies = Object.keys(currencyTotals);
+      const primaryCurr = currencies.includes("USD") ? "USD" : (currencies[0] || "USD");
+      const primaryData = currencyTotals[primaryCurr] || { grossRevenue: 0, amountPaid: 0, outstanding: 0, nights: 0, count: 0 };
+
+      // Average Daily Rate (ADR) = Total Room Revenue ÷ Total Room Nights Booked
+      const adr = primaryData.nights > 0 ? (primaryData.grossRevenue / primaryData.nights) : 0;
+
+      // Update Total Gross Revenue
+      const elGross = document.getElementById("mGrossRevenue");
+      const elGrossSub = document.getElementById("mGrossRevenueSub");
+      if (elGross) {
+        elGross.textContent = `${primaryCurr} ${primaryData.grossRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      }
+      if (elGrossSub) {
+        elGrossSub.textContent = `Collected: ${primaryCurr} ${primaryData.amountPaid.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      }
+
+      // Update Outstanding Balances
+      const elOut = document.getElementById("mOutstandingBalances");
+      const elOutSub = document.getElementById("mOutstandingSub");
+      if (elOut) {
+        elOut.textContent = `${primaryCurr} ${primaryData.outstanding.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      }
+      if (elOutSub) {
+        const unpaidCount = activeReservations.filter(r => (Number(r.total_reservation_price) || 0) > (Number(r.amount_paid) || 0)).length;
+        elOutSub.textContent = `${unpaidCount} booking${unpaidCount !== 1 ? 's' : ''} with balance due`;
+      }
+
+      // Update Average Daily Rate (ADR)
+      const elAdr = document.getElementById("mADR");
+      const elAdrSub = document.getElementById("mADRSub");
+      if (elAdr) {
+        elAdr.textContent = primaryData.nights > 0
+          ? `${primaryCurr} ${adr.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+          : "N/A";
+      }
+      if (elAdrSub) {
+        elAdrSub.textContent = primaryData.nights > 0
+          ? `Calculated across ${primaryData.nights} booked nights`
+          : "No booked nights";
+      }
+
+      // Secondary currency breakdown if multiple currencies exist
+      const multiCurrContainer = document.getElementById("multiCurrencyBreakdown");
+      const otherCurrencies = currencies.filter(c => c !== primaryCurr);
+      if (otherCurrencies.length > 0 && multiCurrContainer) {
+        multiCurrContainer.style.display = "block";
+        let extraHtml = "<strong>Additional Currency Summaries:</strong> ";
+        otherCurrencies.forEach(c => {
+          const d = currencyTotals[c];
+          const cAdr = d.nights > 0 ? (d.grossRevenue / d.nights).toFixed(2) : "0.00";
+          extraHtml += `<span style="margin-right:10px; background:#FAF8F5; padding:3px 8px; border-radius:3px; border:1px solid #E2DBD0; display:inline-block; margin-top:4px;">
+            ${c}: Gross ${c} ${d.grossRevenue.toFixed(2)} • Bal ${c} ${d.outstanding.toFixed(2)} • ADR ${c} ${cAdr} (${d.nights} nights)
+          </span>`;
+        });
+        multiCurrContainer.innerHTML = extraHtml;
+      } else if (multiCurrContainer) {
+        multiCurrContainer.style.display = "none";
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 30-DAY OCCUPANCY TREND (RECHARTS INTEGRATION)
+    // -------------------------------------------------------------------------
+    function getOccupancyDataLast30Days() {
+      const data = [];
+      const operationalRoomsCount = PHYSICAL_ROOMS.filter(r => r.status === "Operational").length || 13;
+      let totalOccupancySum = 0;
+
+      for (let i = 29; i >= 0; i--) {
+        const targetDate = addDays(currentBusinessDate, -i);
+        const occupiedRoomNumbers = new Set();
+
+        RESERVATIONS.forEach(res => {
+          if (res.reservation_status === "Cancelled") return;
+          // Check-in inclusive, check-out exclusive
+          if (res.check_in_date <= targetDate && res.check_out_date > targetDate) {
+            if (res.physical_room_number) {
+              occupiedRoomNumbers.add(res.physical_room_number);
+            }
+          }
+        });
+
+        const occupiedCount = occupiedRoomNumbers.size;
+        const rate = Math.min(100, Math.round((occupiedCount / operationalRoomsCount) * 100));
+        totalOccupancySum += rate;
+
+        const dateParts = targetDate.split("-");
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const monthStr = monthNames[parseInt(dateParts[1], 10) - 1] || dateParts[1];
+        const dayStr = parseInt(dateParts[2], 10);
+        const label = `${monthStr} ${dayStr}`;
+
+        data.push({
+          date: targetDate,
+          label: label,
+          occupied: occupiedCount,
+          total: operationalRoomsCount,
+          rate: rate
+        });
+      }
+
+      const averageRate = Math.round(totalOccupancySum / 30);
+      return { data, averageRate };
+    }
+
+    let rechartsRootInstance = null;
+
+    function renderOccupancyChart() {
+      const container = document.getElementById("occupancyChartContainer");
+      const avgBadge = document.getElementById("thirtyDayAvgBadge");
+      if (!container) return;
+
+      const { data, averageRate } = getOccupancyDataLast30Days();
+      if (avgBadge) {
+        avgBadge.textContent = `30-Day Avg: ${averageRate}%`;
+      }
+
+      // Check for Recharts and React in global scope
+      if (window.React && window.ReactDOM && window.Recharts) {
+        try {
+          const React = window.React;
+          const ReactDOM = window.ReactDOM;
+          const {
+            ResponsiveContainer,
+            AreaChart,
+            Area,
+            XAxis,
+            YAxis,
+            Tooltip,
+            CartesianGrid
+          } = window.Recharts;
+
+          const e = React.createElement;
+
+          // Custom Tooltip for Recharts
+          const CustomTooltip = (props) => {
+            const { active, payload } = props;
+            if (active && payload && payload.length) {
+              const item = payload[0].payload;
+              return e('div', {
+                style: {
+                  backgroundColor: '#151515',
+                  color: '#FAF9F6',
+                  padding: '9px 13px',
+                  borderRadius: '4px',
+                  border: '1px solid #B99A61',
+                  fontSize: '12px',
+                  boxShadow: '0 6px 16px rgba(0,0,0,0.25)',
+                  minWidth: '130px'
+                }
+              }, [
+                e('div', { key: 'date', style: { fontWeight: 700, color: '#C7B28D', marginBottom: '4px' } }, `${item.label} (${item.date})`),
+                e('div', { key: 'rate', style: { fontSize: '15px', fontWeight: 800, color: '#FFFFFF' } }, `${item.rate}% Occupancy`),
+                e('div', { key: 'rooms', style: { color: '#B5AFA6', fontSize: '11px', marginTop: '3px' } }, `${item.occupied} of ${item.total} rooms booked`)
+              ]);
+            }
+            return null;
+          };
+
+          // Build AreaChart Component
+          const chartElement = e(ResponsiveContainer, { width: '100%', height: 260 },
+            e(AreaChart, { data: data, margin: { top: 10, right: 15, left: -18, bottom: 0 } }, [
+              e('defs', { key: 'defs' },
+                e('linearGradient', { id: 'occupancyGradient', x1: '0', y1: '0', x2: '0', y2: '1' }, [
+                  e('stop', { key: 'stop1', offset: '5%', stopColor: '#B99A61', stopOpacity: 0.75 }),
+                  e('stop', { key: 'stop2', offset: '95%', stopColor: '#B99A61', stopOpacity: 0.05 })
+                ])
+              ),
+              e(CartesianGrid, { key: 'grid', strokeDasharray: '3 3', stroke: '#EAE5DD', vertical: false }),
+              e(XAxis, {
+                key: 'xaxis',
+                dataKey: 'label',
+                stroke: '#77736B',
+                fontSize: 11,
+                tickLine: false,
+                interval: 4
+              }),
+              e(YAxis, {
+                key: 'yaxis',
+                stroke: '#77736B',
+                fontSize: 11,
+                tickLine: false,
+                domain: [0, 100],
+                tickFormatter: (val) => `${val}%`
+              }),
+              e(Tooltip, { key: 'tooltip', content: e(CustomTooltip) }),
+              e(Area, {
+                key: 'area',
+                type: 'monotone',
+                dataKey: 'rate',
+                stroke: '#B99A61',
+                strokeWidth: 2.5,
+                fillOpacity: 1,
+                fill: 'url(#occupancyGradient)',
+                activeDot: { r: 5, fill: '#151515', stroke: '#B99A61', strokeWidth: 2 }
+              })
+            ])
+          );
+
+          if (!rechartsRootInstance) {
+            if (ReactDOM.createRoot) {
+              rechartsRootInstance = ReactDOM.createRoot(container);
+            }
+          }
+          if (rechartsRootInstance) {
+            rechartsRootInstance.render(chartElement);
+            return;
+          } else if (ReactDOM.render) {
+            ReactDOM.render(chartElement, container);
+            return;
+          }
+        } catch (chartErr) {
+          console.warn("Recharts render error, falling back to SVG chart:", chartErr);
+        }
+      }
+
+      // Elegant SVG fallback chart in case Recharts CDN is still initializing
+      renderSvgFallbackChart(container, data);
+    }
+
+    function renderSvgFallbackChart(container, data) {
+      const width = 800;
+      const height = 240;
+      const padLeft = 40;
+      const padRight = 20;
+      const padTop = 15;
+      const padBottom = 30;
+
+      const chartW = width - padLeft - padRight;
+      const chartH = height - padTop - padBottom;
+
+      const points = data.map((d, i) => {
+        const x = padLeft + (i / (data.length - 1)) * chartW;
+        const y = padTop + chartH - (d.rate / 100) * chartH;
+        return { x, y, ...d };
+      });
+
+      const polyPoints = points.map(p => `${p.x},${p.y}`).join(" ");
+      const areaPoints = `${padLeft},${padTop + chartH} ${polyPoints} ${padLeft + chartW},${padTop + chartH}`;
+
+      let svg = `<svg viewBox="0 0 ${width} ${height}" style="width:100%; height:100%; display:block;" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="svgGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stop-color="#B99A61" stop-opacity="0.6"/>
+            <stop offset="95%" stop-color="#B99A61" stop-opacity="0.05"/>
+          </linearGradient>
+        </defs>
+        <!-- Horizontal grid lines -->
+        <line x1="${padLeft}" y1="${padTop}" x2="${width - padRight}" y2="${padTop}" stroke="#EAE5DD" stroke-dasharray="3,3" />
+        <line x1="${padLeft}" y1="${padTop + chartH * 0.5}" x2="${width - padRight}" y2="${padTop + chartH * 0.5}" stroke="#EAE5DD" stroke-dasharray="3,3" />
+        <line x1="${padLeft}" y1="${padTop + chartH}" x2="${width - padRight}" y2="${padTop + chartH}" stroke="#EAE5DD" />
+        <!-- Axis labels -->
+        <text x="${padLeft - 8}" y="${padTop + 4}" fill="#77736B" font-size="10" text-anchor="end">100%</text>
+        <text x="${padLeft - 8}" y="${padTop + chartH * 0.5 + 4}" fill="#77736B" font-size="10" text-anchor="end">50%</text>
+        <text x="${padLeft - 8}" y="${padTop + chartH + 4}" fill="#77736B" font-size="10" text-anchor="end">0%</text>
+        <!-- Area and Line -->
+        <polygon points="${areaPoints}" fill="url(#svgGrad)" />
+        <polyline points="${polyPoints}" fill="none" stroke="#B99A61" stroke-width="2.5" />
+      `;
+
+      points.forEach((p, i) => {
+        if (i % 5 === 0 || i === points.length - 1) {
+          svg += `<text x="${p.x}" y="${height - 8}" fill="#77736B" font-size="10" text-anchor="middle">${p.label}</text>`;
+        }
+      });
+
+      svg += `</svg>`;
+      container.innerHTML = svg;
+    }
+
+    function changeBusinessDate(delta) {
+      currentBusinessDate = addDays(currentBusinessDate, delta);
+      renderDashboard();
+    }
+    function setBusinessDate(val) {
+      if (val) {
+        currentBusinessDate = val;
+        renderDashboard();
+      }
+    }
+    function resetBusinessDateToday() {
+      currentBusinessDate = getCairoTodayString();
+      renderDashboard();
+    }
+
+    // -------------------------------------------------------------------------
+    // PAGE 2: ALL RESERVATIONS
+    // -------------------------------------------------------------------------
+    function renderReservationsTable() {
+      const tbody = document.getElementById("reservationsTableBody");
+      const searchTerm = document.getElementById("resSearchInput").value.toLowerCase().trim();
+      const filterCat = document.getElementById("resFilterCategory").value;
+      const filterStatus = document.getElementById("resFilterStatus").value;
+      const filterSource = document.getElementById("resFilterSource").value;
+
+      let filtered = RESERVATIONS.filter(r => {
+        if (filterCat && r.room_category_code !== filterCat) return false;
+        if (filterStatus && r.reservation_status !== filterStatus) return false;
+        if (filterSource && r.booking_source !== filterSource) return false;
+        if (searchTerm) {
+          const matchName = (r.guest_full_name || "").toLowerCase().includes(searchTerm);
+          const matchId = (r.id || "").toLowerCase().includes(searchTerm);
+          const matchRef = (r.external_booking_reference || "").toLowerCase().includes(searchTerm);
+          const matchRoom = (r.physical_room_number || "").includes(searchTerm);
+          if (!matchName && !matchId && !matchRef && !matchRoom) return false;
+        }
+        return true;
+      });
+
+      // Sort by arrival date descending
+      filtered.sort((a, b) => new Date(b.check_in_date) - new Date(a.check_in_date));
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:24px; color:var(--secondary-text);">No reservations match the selected criteria.</td></tr>`;
+        return;
+      }
+
+      let html = "";
+      filtered.forEach(r => {
+        const nights = calculateNights(r.check_in_date, r.check_out_date);
+        const outstanding = (Number(r.total_reservation_price) || 0) - (Number(r.amount_paid) || 0);
+        html += `<tr>
+          <td>
+            <strong>${(r.id || "").substring(0, 8)}</strong>
+            <div style="font-size:0.72rem; color:var(--secondary-text);">${escapeHtml(r.external_booking_reference || "Direct Booking")}</div>
+          </td>
+          <td>
+            <strong>${escapeHtml(r.guest_full_name)}</strong>
+            <div style="font-size:0.75rem; color:var(--secondary-text);">${escapeHtml(r.guest_phone || "")}</div>
+          </td>
+          <td>
+            ${r.check_in_date} → ${r.check_out_date}
+            <div style="font-size:0.72rem; color:var(--secondary-text);">${nights} Night${nights > 1 ? 's' : ''}</div>
+          </td>
+          <td>
+            <strong>Room ${r.physical_room_number}</strong>
+            <div style="font-size:0.72rem; color:var(--secondary-text);">${escapeHtml(r.room_category_name || "")}</div>
+          </td>
+          <td>${r.adults}A, ${r.children}C</td>
+          <td>${r.booking_source}</td>
+          <td><span class="badge badge-${(r.reservation_status || '').toLowerCase()}">${r.reservation_status}</span></td>
+          <td>
+            <div>${r.currency || 'USD'} ${Number(r.total_reservation_price || 0).toFixed(2)}</div>
+            <div style="font-size:0.72rem; color:${outstanding > 0 ? 'var(--warning-amber)' : 'var(--success-green)'};">
+              ${outstanding > 0 ? `Bal: ${r.currency} ${outstanding.toFixed(2)}` : 'Fully Paid'}
+            </div>
+          </td>
+          <td>
+            <button class="btn-action btn-secondary" onclick="viewReservationDetails('${r.id}')">Manage</button>
+          </td>
+        </tr>`;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function applyReservationFilters() {
+      renderReservationsTable();
+    }
+    function clearReservationFilters() {
+      document.getElementById("resSearchInput").value = "";
+      document.getElementById("resFilterCategory").value = "";
+      document.getElementById("resFilterStatus").value = "";
+      document.getElementById("resFilterSource").value = "";
+      renderReservationsTable();
+    }
+
+    // -------------------------------------------------------------------------
+    // PAGE 3: ROOM RACK (Interactive 14-day Calendar)
+    // -------------------------------------------------------------------------
+    function renderRoomRack() {
+      const container = document.getElementById("rackContainer");
+      const numDays = 14;
+      const dates = [];
+      for (let i = 0; i < numDays; i++) {
+        dates.push(addDays(rackStartDate, i));
+      }
+
+      let html = `<div class="rack-grid">`;
+      // Header row
+      html += `<div class="rack-header-row">
+        <div class="rack-room-col-header">Room / Type (13 Rooms)</div>
+        <div class="rack-date-cells">`;
+      dates.forEach(d => {
+        const isToday = d === getCairoTodayString();
+        const parts = d.split("-");
+        const monthDay = parts[1] + "/" + parts[2];
+        const dayName = new Date(d + "T00:00:00").toLocaleDateString("en-US", { weekday: "short" });
+        html += `<div class="rack-date-header ${isToday ? 'today' : ''}">
+          <div style="font-weight:700;">${dayName}</div>
+          <div>${monthDay}</div>
+        </div>`;
+      });
+      html += `</div></div>`;
+
+      // Group rooms by category
+      CATEGORIES.forEach(cat => {
+        const roomsInCat = PHYSICAL_ROOMS.filter(r => r.category_code === cat.code);
+        if (roomsInCat.length === 0) return;
+
+        html += `<div class="rack-category-row">
+          <span>${cat.name}</span>
+          <span>${roomsInCat.length} Room${roomsInCat.length > 1 ? 's' : ''}</span>
+        </div>`;
+
+        roomsInCat.forEach(room => {
+          const isUnconfigured = room.max_occupancy === null || room.max_occupancy === undefined;
+          html += `<div class="rack-room-row">
+            <div class="rack-room-info" onclick="openRoomConfigModal('${room.room_number}')">
+              <div class="rack-room-number">
+                Room ${room.room_number}
+                ${room.features && room.features.includes("Jacuzzi") ? '<span class="badge badge-jacuzzi">Jacuzzi</span>' : ''}
+              </div>
+              <div class="rack-room-meta">
+                ${room.bed_config} • ${isUnconfigured ? '<strong style="color:var(--error-red);">Unconfigured</strong>' : `Max ${room.max_occupancy} guests`}
+                ${room.status !== 'Operational' ? ` • <strong style="color:var(--error-red);">${room.status}</strong>` : ''}
+              </div>
+            </div>
+            <div class="rack-days-strip">`;
+
+          // Date cells
+          dates.forEach(d => {
+            const isToday = d === getCairoTodayString();
+            html += `<div class="rack-day-cell ${isToday ? 'today-col' : ''}"
+              onclick="handleCellClick('${room.room_number}', '${d}')"
+              ondragover="handleDragOver(event)"
+              ondrop="handleDropReservation(event, '${room.room_number}')"
+              data-room="${room.room_number}" data-date="${d}"></div>`;
+          });
+
+          // Overlay reservations for this room spanning in view
+          const roomReservations = RESERVATIONS.filter(r =>
+            r.physical_room_number === room.room_number &&
+            r.reservation_status !== "Cancelled" &&
+            doDatesOverlap(r.check_in_date, r.check_out_date, dates[0], addDays(dates[numDays - 1], 1))
+          );
+
+          roomReservations.forEach(res => {
+            // Check-in inclusive, check-out exclusive bar math
+            const startIdx = dates.indexOf(res.check_in_date);
+            const endIdx = dates.indexOf(res.check_out_date);
+
+            let colStart = startIdx >= 0 ? startIdx : 0;
+            let colEnd = endIdx >= 0 ? endIdx : numDays;
+
+            // If start is before view, clip
+            if (res.check_in_date < dates[0]) colStart = 0;
+            // If end is after view, clip
+            if (res.check_out_date > dates[numDays - 1]) colEnd = numDays;
+
+            const spanDays = Math.max(1, colEnd - colStart);
+            const cellWidthPercent = 100 / numDays;
+            const leftPercent = colStart * cellWidthPercent;
+            const widthPercent = spanDays * cellWidthPercent;
+
+            html += `<div class="rack-res-bar ${res.reservation_status}"
+              style="left:${leftPercent}%; width:${widthPercent}%;"
+              draggable="true"
+              ondragstart="handleDragStart(event, '${res.id}')"
+              onclick="event.stopPropagation(); viewReservationDetails('${res.id}')">
+              ${escapeHtml(res.guest_full_name)} (${res.adults}A, ${res.children}C)
+            </div>`;
+          });
+
+          // Overlay operational blocks
+          const roomBlocks = OPERATIONAL_BLOCKS.filter(b =>
+            b.room_number === room.room_number &&
+            b.status === "Active" &&
+            doDatesOverlap(b.start_date, b.end_date, dates[0], addDays(dates[numDays - 1], 1))
+          );
+
+          roomBlocks.forEach(b => {
+            const startIdx = dates.indexOf(b.start_date);
+            const endIdx = dates.indexOf(b.end_date);
+            let colStart = startIdx >= 0 ? startIdx : 0;
+            let colEnd = endIdx >= 0 ? endIdx : numDays;
+            if (b.start_date < dates[0]) colStart = 0;
+            if (b.end_date > dates[numDays - 1]) colEnd = numDays;
+
+            const spanDays = Math.max(1, colEnd - colStart);
+            const cellWidthPercent = 100 / numDays;
+            const leftPercent = colStart * cellWidthPercent;
+            const widthPercent = spanDays * cellWidthPercent;
+
+            html += `<div class="rack-block-bar" style="left:${leftPercent}%; width:${widthPercent}%;"
+              onclick="event.stopPropagation(); alert('Operational Block: ${escapeHtml(b.reason)} (${b.start_date} to ${b.end_date})')">
+              🛠️ ${escapeHtml(b.reason)}
+            </div>`;
+          });
+
+          html += `</div></div>`;
+        });
+      });
+
+      html += `</div>`;
+      container.innerHTML = html;
+    }
+
+    function shiftRackDays(days) {
+      rackStartDate = addDays(rackStartDate, days);
+      document.getElementById("rackStartDateInput").value = rackStartDate;
+      renderRoomRack();
+    }
+    function setRackStartDate(val) {
+      if (val) {
+        rackStartDate = val;
+        renderRoomRack();
+      }
+    }
+    function resetRackToday() {
+      rackStartDate = getCairoTodayString();
+      document.getElementById("rackStartDateInput").value = rackStartDate;
+      renderRoomRack();
+    }
+
+    // Drag and Drop (Desktop Room Reassignment)
+    let draggedReservationId = null;
+    function handleDragStart(ev, resId) {
+      draggedReservationId = resId;
+      ev.dataTransfer.setData("text/plain", resId);
+    }
+    function handleDragOver(ev) {
+      ev.preventDefault();
+    }
+    function handleDropReservation(ev, targetRoomNumber) {
+      ev.preventDefault();
+      if (!draggedReservationId) return;
+
+      const res = RESERVATIONS.find(r => r.id === draggedReservationId);
+      if (!res) return;
+
+      const currentRoom = PHYSICAL_ROOMS.find(r => r.room_number === res.physical_room_number);
+      const targetRoom = PHYSICAL_ROOMS.find(r => r.room_number === targetRoomNumber);
+
+      if (!targetRoom) {
+        alert("Invalid target room.");
+        return;
+      }
+      if (targetRoom.room_number === res.physical_room_number) {
+        return; // dropped on same room
+      }
+
+      // Reassignment Validation:
+      // 1. Same standardized category
+      if (targetRoom.category_code !== res.room_category_code) {
+        alert(`Cannot reassign: Room ${targetRoom.room_number} is category "${targetRoom.category_name}", but reservation requires "${res.room_category_name}".`);
+        return;
+      }
+      // 2. Operational Status
+      if (targetRoom.status !== "Operational") {
+        alert(`Cannot reassign: Room ${targetRoom.room_number} is currently ${targetRoom.status}.`);
+        return;
+      }
+      // 3. Occupancy Configuration
+      if (targetRoom.max_occupancy === null || targetRoom.max_occupancy === undefined) {
+        alert(`Cannot reassign: Room ${targetRoom.room_number} requires maximum occupancy configuration.`);
+        return;
+      }
+      if ((res.adults + res.children) > targetRoom.max_occupancy) {
+        alert(`Cannot reassign: Guest count (${res.adults + res.children}) exceeds room capacity (${targetRoom.max_occupancy}).`);
+        return;
+      }
+      // 4. Overlap with existing bookings in target room
+      const overlap = RESERVATIONS.some(r =>
+        r.id !== res.id &&
+        r.physical_room_number === targetRoom.room_number &&
+        r.reservation_status !== "Cancelled" &&
+        doDatesOverlap(r.check_in_date, r.check_out_date, res.check_in_date, res.check_out_date)
+      );
+      if (overlap) {
+        alert(`Cannot reassign: Room ${targetRoom.room_number} is already booked for overlapping dates.`);
+        return;
+      }
+
+      // Confirm dialog
+      const confirmed = confirm(`Confirm Room Reassignment:\nGuest: ${res.guest_full_name}\nCurrent Room: ${res.physical_room_number}\nProposed Room: ${targetRoom.room_number}\nDates: ${res.check_in_date} to ${res.check_out_date}`);
+      if (!confirmed) return;
+
+      res.physical_room_number = targetRoom.room_number;
+      res.updated_at = new Date().toISOString();
+      saveReservationsLocally();
+
+      if (supabaseClient) {
+        supabaseClient.from("reservations").update({ physical_room_id: targetRoom.id, updated_at: new Date() }).eq("id", res.id);
+      }
+
+      renderAllViews();
+      alert(`Reservation for ${res.guest_full_name} moved to Room ${targetRoom.room_number}.`);
+      draggedReservationId = null;
+    }
+
+    function handleCellClick(roomNumber, dateStr) {
+      const room = PHYSICAL_ROOMS.find(r => r.room_number === roomNumber);
+      if (!room) return;
+      openNewReservationModal({
+        roomNumber: room.room_number,
+        categoryCode: room.category_code,
+        checkIn: dateStr,
+        checkOut: addDays(dateStr, 1)
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // PAGE 4: DAILY ARRIVALS (Front Desk)
+    // -------------------------------------------------------------------------
+    function renderDailyArrivals() {
+      document.getElementById("arrivalsDateLabel").textContent = arrivalsSelectedDate;
+      document.getElementById("arrivalsDatePicker").value = arrivalsSelectedDate;
+      const stateFilter = document.getElementById("arrivalsFilterState").value;
+      const tbody = document.getElementById("arrivalsTableBody");
+
+      let arrivals = RESERVATIONS.filter(r => r.check_in_date === arrivalsSelectedDate);
+
+      if (stateFilter === "Expected") {
+        arrivals = arrivals.filter(r => r.reservation_status === "Confirmed");
+      } else if (stateFilter === "Checked-in") {
+        arrivals = arrivals.filter(r => r.reservation_status === "Checked-in");
+      } else if (stateFilter === "No-show") {
+        arrivals = arrivals.filter(r => r.reservation_status === "No-show");
+      } else if (stateFilter === "All") {
+        arrivals = arrivals.filter(r => r.reservation_status !== "Cancelled");
+      } else if (stateFilter === "Cancelled") {
+        arrivals = arrivals.filter(r => r.reservation_status === "Cancelled");
+      }
+
+      if (arrivals.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:24px; color:var(--secondary-text);">No arrivals found for ${arrivalsSelectedDate} (${stateFilter}).</td></tr>`;
+        return;
+      }
+
+      let html = "";
+      arrivals.forEach(r => {
+        const nights = calculateNights(r.check_in_date, r.check_out_date);
+        const room = PHYSICAL_ROOMS.find(pr => pr.room_number === r.physical_room_number);
+        html += `<tr>
+          <td><strong style="font-size:1.05rem;">Room ${r.physical_room_number}</strong></td>
+          <td>
+            <strong>${escapeHtml(r.guest_full_name)}</strong>
+            <div style="font-size:0.75rem; color:var(--secondary-text);">${escapeHtml(r.guest_phone || 'No phone')}</div>
+          </td>
+          <td>
+            ${escapeHtml(r.room_category_name || '')}
+            <div style="font-size:0.72rem; color:var(--secondary-text);">${room ? room.bed_config : ''}</div>
+          </td>
+          <td>${nights} Night${nights > 1 ? 's' : ''} (out ${r.check_out_date})</td>
+          <td>${r.adults}A, ${r.children}C</td>
+          <td>
+            ${r.booking_source}
+            <div style="font-size:0.72rem; color:var(--secondary-text);">${escapeHtml(r.external_booking_reference || '')}</div>
+          </td>
+          <td>
+            <span class="badge ${r.payment_status === 'Paid' ? 'badge-checkedin' : 'badge-noshow'}">${r.payment_status}</span>
+          </td>
+          <td><span class="badge badge-${(r.reservation_status || '').toLowerCase()}">${r.reservation_status}</span></td>
+          <td>
+            ${r.reservation_status === 'Confirmed' ? `
+              <button class="btn-action btn-checkin" onclick="handleCheckInReservation('${r.id}')">Check In</button>
+              <button class="btn-action btn-secondary" style="margin-left:4px;" onclick="handleMarkNoShow('${r.id}')">No-Show</button>
+            ` : ''}
+            ${r.reservation_status === 'Checked-in' ? `
+              <button class="btn-action btn-checkout" onclick="handleCheckOutReservation('${r.id}')">Check Out</button>
+            ` : ''}
+            <button class="btn-action btn-secondary" style="margin-left:4px;" onclick="viewReservationDetails('${r.id}')">Details</button>
+          </td>
+        </tr>`;
+      });
+      tbody.innerHTML = html;
+    }
+
+    function changeArrivalsDate(delta) {
+      arrivalsSelectedDate = addDays(arrivalsSelectedDate, delta);
+      renderDailyArrivals();
+    }
+    function setArrivalsDate(val) {
+      if (val) {
+        arrivalsSelectedDate = val;
+        renderDailyArrivals();
+      }
+    }
+    function resetArrivalsToday() {
+      arrivalsSelectedDate = getCairoTodayString();
+      renderDailyArrivals();
+    }
+
+    // -------------------------------------------------------------------------
+    // RESERVATION ACTIONS (Check-In, Check-Out, No-Show, Cancel)
+    // -------------------------------------------------------------------------
+    function handleCheckInReservation(resId) {
+      const res = RESERVATIONS.find(r => r.id === resId);
+      if (!res) return;
+
+      // Check-in validations:
+      if (res.reservation_status === "Cancelled") {
+        alert("Cannot check in a cancelled reservation.");
+        return;
+      }
+      if (res.reservation_status === "Checked-out") {
+        alert("This reservation has already checked out.");
+        return;
+      }
+      if (res.reservation_status === "Checked-in") {
+        alert("Guest is already checked in.");
+        return;
+      }
+
+      const room = PHYSICAL_ROOMS.find(r => r.room_number === res.physical_room_number);
+      if (!room) {
+        alert("Assigned physical room not found.");
+        return;
+      }
+      if (room.status !== "Operational") {
+        alert(`Cannot check in: Room ${room.room_number} is currently ${room.status}. Please reassign room first.`);
+        return;
+      }
+      if (room.max_occupancy === null || room.max_occupancy === undefined) {
+        alert(`Cannot check in: Room ${room.room_number} requires maximum occupancy configuration.`);
+        return;
+      }
+
+      // Check if another guest is currently occupying this room
+      const currentGuest = RESERVATIONS.find(r =>
+        r.id !== res.id &&
+        r.physical_room_number === room.room_number &&
+        r.reservation_status === "Checked-in"
+      );
+      if (currentGuest) {
+        alert(`Cannot check in: Room ${room.room_number} is currently occupied by ${currentGuest.guest_full_name}. Please complete check-out or reassign.`);
+        return;
+      }
+
+      if (!confirm(`Check in guest ${res.guest_full_name} to Room ${room.room_number}?`)) return;
+
+      res.reservation_status = "Checked-in";
+      res.updated_at = new Date().toISOString();
+      saveReservationsLocally();
+
+      if (supabaseClient) {
+        supabaseClient.from("reservations").update({ reservation_status: "Checked-in", updated_at: new Date() }).eq("id", res.id);
+      }
+
+      renderAllViews();
+      alert(`Guest ${res.guest_full_name} checked in to Room ${room.room_number}.`);
+    }
+
+    function handleCheckOutReservation(resId) {
+      const res = RESERVATIONS.find(r => r.id === resId);
+      if (!res) return;
+
+      if (!confirm(`Confirm check-out for ${res.guest_full_name} from Room ${res.physical_room_number}?`)) return;
+
+      res.reservation_status = "Checked-out";
+      res.updated_at = new Date().toISOString();
+      saveReservationsLocally();
+
+      if (supabaseClient) {
+        supabaseClient.from("reservations").update({ reservation_status: "Checked-out", updated_at: new Date() }).eq("id", res.id);
+      }
+
+      renderAllViews();
+      alert(`Guest ${res.guest_full_name} checked out.`);
+    }
+
+    function handleMarkNoShow(resId) {
+      const res = RESERVATIONS.find(r => r.id === resId);
+      if (!res) return;
+
+      if (!confirm(`Mark reservation for ${res.guest_full_name} as NO-SHOW?\nNote: Inventory will remain preserved unless explicitly reassigned or cancelled.`)) return;
+
+      res.reservation_status = "No-show";
+      res.updated_at = new Date().toISOString();
+      saveReservationsLocally();
+
+      if (supabaseClient) {
+        supabaseClient.from("reservations").update({ reservation_status: "No-show", updated_at: new Date() }).eq("id", res.id);
+      }
+
+      renderAllViews();
+    }
+
+    function handleCancelReservation(resId) {
+      const res = RESERVATIONS.find(r => r.id === resId);
+      if (!res) return;
+
+      if (!confirm(`Are you sure you want to CANCEL this reservation for ${res.guest_full_name}?\nCancelled reservations are preserved in history and release physical room inventory.`)) return;
+
+      res.reservation_status = "Cancelled";
+      res.updated_at = new Date().toISOString();
+      saveReservationsLocally();
+
+      if (supabaseClient) {
+        supabaseClient.from("reservations").update({ reservation_status: "Cancelled", updated_at: new Date() }).eq("id", res.id);
+      }
+
+      closeModal("resDetailsModal");
+      renderAllViews();
+      alert("Reservation cancelled and inventory released.");
+    }
+
+    // -------------------------------------------------------------------------
+    // NEW RESERVATION WORKFLOW
+    // -------------------------------------------------------------------------
+    function initCategoryDropdowns() {
+      const select = document.getElementById("nRoomCategory");
+      const filterSelect = document.getElementById("resFilterCategory");
+      select.innerHTML = '<option value="">Select Category...</option>';
+      filterSelect.innerHTML = '<option value="">All Categories</option>';
+
+      CATEGORIES.forEach(c => {
+        select.innerHTML += `<option value="${c.code}">${c.name}</option>`;
+        filterSelect.innerHTML += `<option value="${c.code}">${c.name}</option>`;
+      });
+    }
+
+    function openNewReservationModal(preset = null) {
+      document.getElementById("newResForm").reset();
+      const today = getCairoTodayString();
+      const tomorrow = addDays(today, 1);
+
+      document.getElementById("nCheckIn").value = preset && preset.checkIn ? preset.checkIn : today;
+      document.getElementById("nCheckOut").value = preset && preset.checkOut ? preset.checkOut : tomorrow;
+      document.getElementById("nAdults").value = 1;
+      document.getElementById("nChildren").value = 0;
+      document.getElementById("nBookingSource").value = "Direct";
+      document.getElementById("nPaymentStatus").value = "Unpaid";
+      document.getElementById("nTotalPrice").value = "0";
+      document.getElementById("nAmountPaid").value = "0";
+
+      if (preset && preset.categoryCode) {
+        document.getElementById("nRoomCategory").value = preset.categoryCode;
+      }
+
+      onReservationCriteriaChange();
+
+      if (preset && preset.roomNumber) {
+        setTimeout(() => {
+          document.getElementById("nPhysicalRoom").value = preset.roomNumber;
+        }, 50);
+      }
+
+      openModal("newResModal");
+    }
+
+    function onReservationCriteriaChange() {
+      const catCode = document.getElementById("nRoomCategory").value;
+      const checkIn = document.getElementById("nCheckIn").value;
+      const checkOut = document.getElementById("nCheckOut").value;
+      const adults = parseInt(document.getElementById("nAdults").value, 10) || 1;
+      const children = parseInt(document.getElementById("nChildren").value, 10) || 0;
+      const totalGuests = adults + children;
+
+      const roomSelect = document.getElementById("nPhysicalRoom");
+      const roomHint = document.getElementById("nRoomHint");
+
+      if (!catCode || !checkIn || !checkOut) {
+        roomSelect.innerHTML = '<option value="">Select Category & Dates First</option>';
+        roomHint.textContent = "";
+        return;
+      }
+      if (checkOut <= checkIn) {
+        roomSelect.innerHTML = '<option value="">Check-out must be after Check-in</option>';
+        roomHint.textContent = "Invalid stay dates.";
+        return;
+      }
+
+      const eligible = getEligibleRooms(catCode, checkIn, checkOut, totalGuests);
+
+      if (eligible.length === 0) {
+        roomSelect.innerHTML = '<option value="">No eligible rooms available</option>';
+        roomHint.textContent = "⚠️ All rooms in this category are booked, blocked, unconfigured, or capacity exceeded.";
+        roomHint.style.color = "var(--error-red)";
+      } else {
+        let optHtml = "";
+        eligible.forEach((r, idx) => {
+          optHtml += `<option value="${r.room_number}">Room ${r.room_number} (${r.bed_config}, max ${r.max_occupancy} guests)${idx === 0 ? ' - Auto Suggested' : ''}</option>`;
+        });
+        roomSelect.innerHTML = optHtml;
+        roomHint.textContent = `✓ ${eligible.length} eligible physical room(s) available in this category.`;
+        roomHint.style.color = "var(--success-green)";
+      }
+    }
+
+    async function handleSaveNewReservation(ev) {
+      ev.preventDefault();
+
+      const guestName = document.getElementById("nGuestName").value.trim();
+      const guestPhone = document.getElementById("nGuestPhone").value.trim();
+      const guestEmail = document.getElementById("nGuestEmail").value.trim();
+      const source = document.getElementById("nBookingSource").value;
+      const checkIn = document.getElementById("nCheckIn").value;
+      const checkOut = document.getElementById("nCheckOut").value;
+      const adults = parseInt(document.getElementById("nAdults").value, 10) || 1;
+      const children = parseInt(document.getElementById("nChildren").value, 10) || 0;
+      const catCode = document.getElementById("nRoomCategory").value;
+      const roomNumber = document.getElementById("nPhysicalRoom").value;
+      const totalPrice = parseFloat(document.getElementById("nTotalPrice").value) || 0;
+      const currency = document.getElementById("nCurrency").value;
+      const paymentStatus = document.getElementById("nPaymentStatus").value;
+      const amountPaid = parseFloat(document.getElementById("nAmountPaid").value) || 0;
+      const externalRef = document.getElementById("nExternalRef").value.trim();
+      const notes = document.getElementById("nNotes").value.trim();
+
+      if (!roomNumber) {
+        alert("Cannot confirm: No eligible physical room selected.");
+        return;
+      }
+      if (checkOut <= checkIn) {
+        alert("Check-out date must be later than check-in date.");
+        return;
+      }
+
+      // Revalidate room eligibility immediately before saving
+      const eligible = getEligibleRooms(catCode, checkIn, checkOut, adults + children);
+      const isEligible = eligible.some(r => r.room_number === roomNumber);
+      if (!isEligible) {
+        alert("Validation error: The selected room is no longer eligible or has a conflict. Please re-check availability.");
+        onReservationCriteriaChange();
+        return;
+      }
+
+      const catObj = CATEGORIES.find(c => c.code === catCode);
+      const roomObj = PHYSICAL_ROOMS.find(r => r.room_number === roomNumber);
+
+      const newReservation = {
+        id: "res-" + Date.now().toString(36) + "-" + Math.random().toString(36).substring(2, 6),
+        external_booking_reference: externalRef || "DIR-" + Date.now().toString().slice(-6),
+        guest_full_name: guestName,
+        guest_phone: guestPhone,
+        guest_email: guestEmail,
+        check_in_date: checkIn,
+        check_out_date: checkOut,
+        adults: adults,
+        children: children,
+        room_category_code: catCode,
+        room_category_name: catObj ? catObj.name : "",
+        physical_room_number: roomNumber,
+        original_ota_name: roomObj ? roomObj.ota_name : "",
+        booking_source: source,
+        reservation_status: "Confirmed",
+        payment_status: paymentStatus,
+        total_reservation_price: totalPrice,
+        currency: currency,
+        amount_paid: amountPaid,
+        notes: notes,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      // Atomic save
+      RESERVATIONS.push(newReservation);
+      saveReservationsLocally();
+
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from("reservations").insert([{
+            id: newReservation.id,
+            external_booking_reference: newReservation.external_booking_reference,
+            guest_full_name: newReservation.guest_full_name,
+            guest_phone: newReservation.guest_phone,
+            guest_email: newReservation.guest_email,
+            check_in_date: newReservation.check_in_date,
+            check_out_date: newReservation.check_out_date,
+            adults: newReservation.adults,
+            children: newReservation.children,
+            room_type_id: catObj ? catObj.id : null,
+            physical_room_id: roomObj ? roomObj.id : null,
+            booking_source: newReservation.booking_source,
+            reservation_status: newReservation.reservation_status,
+            total_reservation_price: newReservation.total_reservation_price,
+            currency: newReservation.currency,
+            payment_status: newReservation.payment_status,
+            amount_paid: newReservation.amount_paid,
+            notes: newReservation.notes
+          }]);
+        } catch (e) {
+          console.warn("Supabase insert note:", e);
+        }
+      }
+
+      closeModal("newResModal");
+      renderAllViews();
+      alert(`Reservation saved successfully for ${guestName} (Room ${roomNumber})!`);
+    }
+
+    // -------------------------------------------------------------------------
+    // RESERVATION DETAILS & MANAGEMENT MODAL
+    // -------------------------------------------------------------------------
+    function viewReservationDetails(resId) {
+      const res = RESERVATIONS.find(r => r.id === resId);
+      if (!res) return;
+
+      const nights = calculateNights(res.check_in_date, res.check_out_date);
+      const room = PHYSICAL_ROOMS.find(pr => pr.room_number === res.physical_room_number);
+      const outstanding = (Number(res.total_reservation_price) || 0) - (Number(res.amount_paid) || 0);
+
+      let bodyHtml = `
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+          <div>
+            <h4 style="font-size:1.15rem; color:var(--obsidian);">${escapeHtml(res.guest_full_name)}</h4>
+            <span style="font-size:0.8rem; color:var(--secondary-text);">${escapeHtml(res.guest_phone || 'No phone')} • ${escapeHtml(res.guest_email || 'No email')}</span>
+          </div>
+          <div>
+            <span class="badge badge-${res.reservation_status.toLowerCase()}">${res.reservation_status}</span>
+          </div>
+        </div>
+
+        <div style="background:#FAF8F5; border:1px solid var(--border-color); border-radius:6px; padding:12px; margin-bottom:16px; font-size:0.85rem;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <div><strong>Dates:</strong> ${res.check_in_date} → ${res.check_out_date} (${nights} Nights)</div>
+            <div><strong>Assigned Room:</strong> Room ${res.physical_room_number}</div>
+            <div><strong>Category:</strong> ${escapeHtml(res.room_category_name || '')}</div>
+            <div><strong>Bed Config:</strong> ${room ? room.bed_config : 'Standard'}</div>
+            <div><strong>Guests:</strong> ${res.adults} Adults, ${res.children} Children</div>
+            <div><strong>Source:</strong> ${res.booking_source} (${escapeHtml(res.external_booking_reference || 'N/A')})</div>
+          </div>
+        </div>
+
+        <div style="background:#FAF8F5; border:1px solid var(--border-color); border-radius:6px; padding:12px; margin-bottom:16px; font-size:0.85rem;">
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <div><strong>Total Price:</strong> ${res.currency || 'USD'} ${Number(res.total_reservation_price || 0).toFixed(2)}</div>
+            <div><strong>Amount Paid:</strong> ${res.currency || 'USD'} ${Number(res.amount_paid || 0).toFixed(2)}</div>
+            <div><strong>Payment Status:</strong> ${res.payment_status}</div>
+            <div><strong>Balance:</strong> <span style="color:${outstanding > 0 ? 'var(--warning-amber)' : 'var(--success-green)'}; font-weight:700;">${res.currency} ${outstanding.toFixed(2)}</span></div>
+          </div>
+        </div>
+
+        ${res.notes ? `<div style="margin-bottom:16px; font-size:0.85rem;"><strong>Notes:</strong><p style="background:#FFF; border:1px solid #EEE; padding:8px; border-radius:4px; margin-top:4px;">${escapeHtml(res.notes)}</p></div>` : ''}
+
+        <div style="border-top:1px solid var(--border-color); padding-top:16px;">
+          <h5 style="font-size:0.85rem; margin-bottom:8px; text-transform:uppercase; color:var(--secondary-text);">Operational Actions</h5>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            ${res.reservation_status === 'Confirmed' ? `
+              <button class="btn-action btn-checkin" onclick="handleCheckInReservation('${res.id}'); closeModal('resDetailsModal');">Check In Guest</button>
+              <button class="btn-action btn-secondary" onclick="handleMarkNoShow('${res.id}'); closeModal('resDetailsModal');">Mark No-Show</button>
+            ` : ''}
+            ${res.reservation_status === 'Checked-in' ? `
+              <button class="btn-action btn-checkout" onclick="handleCheckOutReservation('${res.id}'); closeModal('resDetailsModal');">Check Out Guest</button>
+            ` : ''}
+            ${res.reservation_status !== 'Cancelled' ? `
+              <button class="btn-action btn-secondary" onclick="promptMobileChangeRoom('${res.id}')">Change Assigned Room</button>
+              <button class="btn-action btn-danger" onclick="handleCancelReservation('${res.id}')">Cancel Reservation</button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+
+      document.getElementById("resDetailsContent").innerHTML = bodyHtml;
+      openModal("resDetailsModal");
+    }
+
+    function promptMobileChangeRoom(resId) {
+      const res = RESERVATIONS.find(r => r.id === resId);
+      if (!res) return;
+
+      const eligible = getEligibleRooms(res.room_category_code, res.check_in_date, res.check_out_date, res.adults + res.children);
+      const eligibleOther = eligible.filter(r => r.room_number !== res.physical_room_number);
+
+      if (eligibleOther.length === 0) {
+        alert("No other rooms in this category are available for the requested stay dates.");
+        return;
+      }
+
+      const roomListStr = eligibleOther.map(r => r.room_number).join(", ");
+      const newRoom = prompt(`Change Assigned Room for ${res.guest_full_name}:\nCurrent Room: ${res.physical_room_number}\nEligible alternative rooms: ${roomListStr}\nEnter new room number:`, eligibleOther[0].room_number);
+
+      if (!newRoom) return;
+
+      const target = eligibleOther.find(r => r.room_number === newRoom.trim());
+      if (!target) {
+        alert(`Room ${newRoom} is not eligible or not available.`);
+        return;
+      }
+
+      res.physical_room_number = target.room_number;
+      res.updated_at = new Date().toISOString();
+      saveReservationsLocally();
+
+      if (supabaseClient) {
+        supabaseClient.from("reservations").update({ physical_room_id: target.id, updated_at: new Date() }).eq("id", res.id);
+      }
+
+      closeModal("resDetailsModal");
+      renderAllViews();
+      alert(`Room successfully changed to ${target.room_number}.`);
+    }
+
+    // -------------------------------------------------------------------------
+    // ROOM CONFIGURATION WORKFLOW
+    // -------------------------------------------------------------------------
+    function openRoomConfigModal(roomNumber) {
+      const room = PHYSICAL_ROOMS.find(r => r.room_number === roomNumber);
+      if (!room) return;
+
+      document.getElementById("rcRoomId").value = room.id;
+      document.getElementById("rcRoomNumber").value = room.room_number;
+      document.getElementById("rcCategory").value = room.category_name;
+      document.getElementById("rcOtaName").value = room.ota_name;
+      document.getElementById("rcBedConfig").value = room.bed_config;
+      document.getElementById("rcMaxOccupancy").value = room.max_occupancy !== null ? room.max_occupancy : "";
+      document.getElementById("rcOperationalStatus").value = room.status;
+      document.getElementById("rcNotes").value = room.notes || "";
+
+      const warn = document.getElementById("rcOccupancyWarn");
+      if (room.max_occupancy === null) {
+        warn.textContent = "Requires Configuration: Max occupancy must be set before this room can be assigned.";
+      } else {
+        warn.textContent = "";
+      }
+
+      openModal("roomConfigModal");
+    }
+
+    function handleSaveRoomConfig(ev) {
+      ev.preventDefault();
+      const roomNumber = document.getElementById("rcRoomNumber").value;
+      const room = PHYSICAL_ROOMS.find(r => r.room_number === roomNumber);
+      if (!room) return;
+
+      const maxOccVal = document.getElementById("rcMaxOccupancy").value.trim();
+      const maxOcc = maxOccVal ? parseInt(maxOccVal, 10) : null;
+      const bedConfig = document.getElementById("rcBedConfig").value;
+      const status = document.getElementById("rcOperationalStatus").value;
+      const notes = document.getElementById("rcNotes").value.trim();
+
+      // Check if taking Out of Service or Maintenance conflicts with future active bookings
+      if (status !== "Operational") {
+        const futureBookings = RESERVATIONS.filter(r =>
+          r.physical_room_number === room.room_number &&
+          r.reservation_status !== "Cancelled" &&
+          r.check_out_date >= getCairoTodayString()
+        );
+        if (futureBookings.length > 0) {
+          const proceed = confirm(`Warning: Room ${room.room_number} has ${futureBookings.length} future reservation(s).\nChanging status to "${status}" will require reassigning or resolving these bookings.\nDo you want to proceed?`);
+          if (!proceed) return;
+        }
+      }
+
+      room.max_occupancy = maxOcc;
+      room.bed_config = bedConfig;
+      room.status = status;
+      room.notes = notes;
+
+      saveRoomConfigurationsLocally();
+
+      if (supabaseClient) {
+        supabaseClient.from("physical_rooms").update({
+          max_occupancy: maxOcc,
+          bed_configuration: bedConfig,
+          operational_status: status,
+          notes: notes,
+          updated_at: new Date()
+        }).eq("room_number", room.room_number);
+      }
+
+      closeModal("roomConfigModal");
+      renderAllViews();
+      alert(`Room ${room.room_number} configuration saved.`);
+    }
+
+    // -------------------------------------------------------------------------
+    // OPERATIONAL BLOCKS
+    // -------------------------------------------------------------------------
+    function openBlockModal() {
+      const select = document.getElementById("bRoomId");
+      select.innerHTML = "";
+      PHYSICAL_ROOMS.forEach(r => {
+        select.innerHTML += `<option value="${r.room_number}">Room ${r.room_number} - ${r.category_name}</option>`;
+      });
+      document.getElementById("bStartDate").value = getCairoTodayString();
+      document.getElementById("bEndDate").value = addDays(getCairoTodayString(), 2);
+      document.getElementById("bReason").value = "";
+      openModal("blockModal");
+    }
+
+    function handleSaveBlock(ev) {
+      ev.preventDefault();
+      const roomNum = document.getElementById("bRoomId").value;
+      const start = document.getElementById("bStartDate").value;
+      const end = document.getElementById("bEndDate").value;
+      const reason = document.getElementById("bReason").value.trim();
+
+      if (end <= start) {
+        alert("End date must be after start date.");
+        return;
+      }
+
+      // Check conflict with existing reservations
+      const conflicts = RESERVATIONS.filter(r =>
+        r.physical_room_number === roomNum &&
+        r.reservation_status !== "Cancelled" &&
+        doDatesOverlap(r.check_in_date, r.check_out_date, start, end)
+      );
+
+      if (conflicts.length > 0) {
+        alert(`Cannot create block: Conflicts with ${conflicts.length} active reservation(s) in Room ${roomNum}. Please resolve reservation assignments first.`);
+        return;
+      }
+
+      const newBlock = {
+        id: "blk-" + Date.now(),
+        room_number: roomNum,
+        start_date: start,
+        end_date: end,
+        reason: reason,
+        status: "Active",
+        created_at: new Date().toISOString()
+      };
+
+      OPERATIONAL_BLOCKS.push(newBlock);
+      saveBlocksLocally();
+
+      if (supabaseClient) {
+        const roomObj = PHYSICAL_ROOMS.find(r => r.room_number === roomNum);
+        supabaseClient.from("operational_blocks").insert([{
+          physical_room_id: roomObj ? roomObj.id : null,
+          start_date: start,
+          end_date: end,
+          reason: reason,
+          status: "Active"
+        }]);
+      }
+
+      closeModal("blockModal");
+      renderAllViews();
+      alert(`Operational block applied for Room ${roomNum} (${start} to ${end}).`);
+    }
+
+    // -------------------------------------------------------------------------
+    // UTILITIES & MODAL HELPERS
+    // -------------------------------------------------------------------------
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add("open");
+    }
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove("open");
+    }
+    function openSettingsModal() {
+      openModal("settingsModal");
+    }
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>

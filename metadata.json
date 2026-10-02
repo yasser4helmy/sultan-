@@ -1,0 +1,6 @@
+{
+  "name": "Sultan Pyramids Boutique Hotel View",
+  "description": "Premium Hotel Operations & Reservation Management System for Sultan Pyramids Boutique Hotel View, Giza, Egypt.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
